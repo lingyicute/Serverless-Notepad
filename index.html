@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小小记事本 Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: 249 250 251; /* gray-50 */
+            --fg: 17 24 39;    /* gray-900 */
+            --border: 209 213 219; /* gray-300 */
+            --card-bg: 255 255 255; /* white */
+            --muted-fg: 107 114 128; /* gray-500 */
+            --placeholder-fg: 156 163 175; /* gray-400 */
+            --primary: 59 130 246; /* blue-500 */
+            --primary-focus: 96 165 250; /* blue-400 */
+        }
+
+        .dark {
+            --bg: 17 24 39;    /* gray-900 */
+            --fg: 243 244 246; /* gray-100 */
+            --border: 55 65 81;   /* gray-700 */
+            --card-bg: 31 41 55;   /* gray-800 */
+            --muted-fg: 156 163 175; /* gray-400 */
+            --placeholder-fg: 107 114 128; /* gray-500 */
+            --primary: 96 165 250; /* blue-400 */
+            --primary-focus: 59 130 246; /* blue-500 */
+        }
+
+        body {
+            background-color: rgb(var(--bg));
+            color: rgb(var(--fg));
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* contenteditable 的 placeholder 实现。*/
+        [contenteditable]:empty:before {
+            content: attr(placeholder);
+            color: rgb(var(--placeholder-fg));
+            pointer-events: none;
+            display: block;
+        }
+
+        /* 自定义Toast动画 */
+        .toast-notification {
+            transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
+        }
+
+        /* 模态框动画 */
+        #share-modal.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #share-modal.visible #modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <main class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8 flex flex-col min-h-screen">
+        <!-- 头部区域 -->
+        <header class="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <!-- [优化] 语义化: 页面主标题使用 <h1> 标签，对SEO和可访问性更友好 -->
+            <h1 id="note-title" contenteditable="true" placeholder="点此编辑标题 ✏️" class="text-3xl md:text-4xl font-bold w-full focus:outline-none cursor-text text-ellipsis overflow-hidden"></h1>
+            
+            <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+                <button id="share-btn" class="flex items-center gap-2 px-4 py-2 bg-[rgb(var(--card-bg))] border border-[rgb(var(--border))] rounded-lg shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                    <span>分享</span>
+                </button>
+                <button id="theme-toggle" aria-label="切换深色或浅色模式" class="w-10 h-10 flex items-center justify-center bg-[rgb(var(--card-bg))] border border-[rgb(var(--border))] rounded-lg shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <!-- 图标将由JS动态插入 -->
+                </button>
+            </div>
+        </header>
+
+        <!-- 编辑区域 -->
+        <div id="note-content" contenteditable="true" placeholder="开始记录吧 ✏️" class="w-full flex-grow min-h-[60vh] p-5 text-lg leading-relaxed bg-[rgb(var(--card-bg))] border-2 border-dashed border-[rgb(var(--border))] rounded-xl focus:outline-none focus:border-solid focus:border-[rgb(var(--primary))] dark:focus:border-[rgb(var(--primary-focus))] transition-all cursor-text whitespace-pre-wrap"></div>
+    </main>
+
+    <!-- Toast 通知 -->
+    <div id="toast" class="toast-notification fixed top-[-100px] left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white font-semibold z-[1050] opacity-0" aria-live="polite"></div>
+
+    <!-- 分享模态框 -->
+    <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-60 z-[1000] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="modal-content" class="bg-[rgb(var(--card-bg))] p-6 rounded-2xl shadow-2xl w-full max-w-2xl transform scale-95 opacity-0 transition-all duration-300">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">分享你的笔记</h3>
+                <!-- [优化] 可访问性: 为纯图标按钮添加 aria-label -->
+                <button id="close-modal" aria-label="关闭分享窗口" class="text-gray-400 hover:text-[rgb(var(--fg))] transition-colors">
+                    <i data-lucide="x" class="w-8 h-8"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- 方式一：离线快照 -->
+                <div>
+                    <p class="font-semibold">方式一：离线快照 (Data-URL)</p>
+                    <p class="text-sm text-[rgb(var(--muted-fg))] mt-1 mb-2">优点是完全独立，像一个文件，可随时离线打开。缺点是链接很长，且必须粘贴到 <strong>浏览器地址栏</strong> 才能打开。</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="data-url-input" readonly class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900 border border-[rgb(var(--border))] rounded-md text-sm text-[rgb(var(--muted-fg))]">
+                        <button id="copy-data-url-btn" class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                            <span>复制</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 方式二：在线链接 -->
+                <div>
+                    <p class="font-semibold">方式二：在线链接 (Redirect-URL)</p>
+                    <p class="text-sm text-[rgb(var(--muted-fg))] mt-1 mb-2">标准的网页链接，可直接发给他人点击。缺点是依赖本站，需要网络连接才能打开。</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="redirect-url-input" readonly class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900 border border-[rgb(var(--border))] rounded-md text-sm text-[rgb(var(--muted-fg))]">
+                        <button id="copy-redirect-url-btn" class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                            <span>复制</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (() => {
+        // --- 1. 常量与配置 ---
+        const CONFIG = {
+            STORAGE_KEYS: {
+                TITLE: 'notepad_pro_title',
+                CONTENT: 'notepad_pro_content',
+                THEME: 'notepad_pro_theme',
+            },
+            URL_MAX_LENGTH: 1800000, // 保守的URL长度限制 (约1.8MB)
+            NOTE_SEPARATOR: '\n[---NOTE-SEPARATOR---]\n',
+            AUTO_SAVE_DEBOUNCE: 500, // ms
+            TOAST_DURATION: 3000, // ms
+            DEPLOY_URL: window.location.origin + window.location.pathname,
+        };
+
+        // --- 2. DOM 元素缓存 ---
+        const DOMElements = {
+            noteTitle: document.getElementById('note-title'),
+            noteContent: document.getElementById('note-content'),
+            shareBtn: document.getElementById('share-btn'),
+            themeToggleBtn: document.getElementById('theme-toggle'),
+            toast: document.getElementById('toast'),
+            modal: {
+                overlay: document.getElementById('share-modal'),
+                content: document.getElementById('modal-content'),
+                closeBtn: document.getElementById('close-modal'),
+                dataUrlInput: document.getElementById('data-url-input'),
+                copyDataUrlBtn: document.getElementById('copy-data-url-btn'),
+                redirectUrlInput: document.getElementById('redirect-url-input'),
+                copyRedirectUrlBtn: document.getElementById('copy-redirect-url-btn'),
+            }
+        };
+
+        // --- 3. 状态管理 ---
+        // 使用一个简单的对象来管理应用的状态，例如 Toast 的计时器。
+        const AppState = {
+            toastTimer: null,
+        };
+
+        // --- 4. 辅助函数 ---
+
+        /**
+         * 显示一个 Toast 通知
+         * @param {string} message - 显示的消息
+         * @param {{isError?: boolean}} options - 选项，例如是否为错误消息
+         */
+        const showToast = (message, { isError = false } = {}) => {
+            clearTimeout(AppState.toastTimer);
+            DOMElements.toast.textContent = message;
+            
+            // [优化] 使用 Tailwind 的 JIT 特性
+            const baseClasses = 'toast-notification fixed top-[-100px] left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white font-semibold z-[1050] opacity-0';
+            const colorClass = isError ? 'bg-red-500' : 'bg-green-500';
+            DOMElements.toast.className = `${baseClasses} ${colorClass}`;
+            
+            // 强制浏览器重绘，以便动画能够正确触发
+            void DOMElements.toast.offsetWidth;
+
+            DOMElements.toast.classList.replace('top-[-100px]', 'top-5');
+            DOMElements.toast.classList.replace('opacity-0', 'opacity-100');
+
+            AppState.toastTimer = setTimeout(() => {
+                DOMElements.toast.classList.replace('top-5', 'top-[-100px]');
+                DOMElements.toast.classList.replace('opacity-100', 'opacity-0');
+            }, CONFIG.TOAST_DURATION);
+        };
+
+        /**
+         * 函数防抖
+         * @param {Function} func - 需要防抖的函数
+         * @param {number} delay - 延迟时间 (ms)
+         * @returns {Function} - 包装后的函数
+         */
+        const debounce = (func, delay) => {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        };
+
+        /**
+         * 复制文本到剪贴板，并提供优雅降级
+         * @param {string} text - 要复制的文本
+         * @param {string} typeName - 用于提示的文本类型名称 (e.g., "链接")
+         */
+        const copyToClipboard = async (text, typeName) => {
+            try {
+                // 优先使用现代、安全的 Clipboard API
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    // 降级方案，适用于 http 或旧版浏览器
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    textArea.style.position = "absolute";
+                    textArea.style.left = "-9999px";
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+                showToast(`${typeName} 已复制到剪贴板！`);
+                closeShareModal();
+            } catch (err) {
+                console.error("复制失败:", err);
+                showToast(`复制失败: ${err.message}`, { isError: true });
+            }
+        };
+
+        // --- 5. 核心功能模块 ---
+
+        const StorageManager = {
+            save() {
+                try {
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.TITLE, DOMElements.noteTitle.innerText);
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.CONTENT, DOMElements.noteContent.innerText);
+                } catch (e) {
+                    console.error("保存到 localStorage 失败:", e);
+                    showToast("无法保存笔记，可能是存储空间已满。", { isError: true });
+                }
+            },
+            load() {
+                const title = localStorage.getItem(CONFIG.STORAGE_KEYS.TITLE);
+                const content = localStorage.getItem(CONFIG.STORAGE_KEYS.CONTENT);
+                if (title !== null) DOMElements.noteTitle.innerText = title;
+                if (content !== null) DOMElements.noteContent.innerText = content;
+            }
+        };
+
+        const ThemeManager = {
+            moonIcon: `<i data-lucide="moon" class="w-5 h-5"></i>`,
+            sunIcon: `<i data-lucide="sun" class="w-5 h-5"></i>`,
+            apply(theme) {
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    DOMElements.themeToggleBtn.innerHTML = this.sunIcon;
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    DOMElements.themeToggleBtn.innerHTML = this.moonIcon;
+                }
+                lucide.createIcons();
+                // 主题状态只在主页面保存，不在 data: URL 的快照中保存
+                if (window.location.protocol !== 'data:') {
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, theme);
+                }
+            },
+            toggle() {
+                const isDark = document.documentElement.classList.contains('dark');
+                this.apply(isDark ? 'light' : 'dark');
+            },
+            init() {
+                const savedTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME);
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                this.apply(savedTheme || (prefersDark ? 'dark' : 'light'));
+            }
+        };
+        
+        const ShareManager = {
+            createSnapshotHtml(title, content, redirectUrl, initialTheme) {
+                // [优化] 使用 JSON.stringify 来安全地将字符串嵌入到JS代码中
+                const safe = (str) => JSON.stringify(str);
+                return `<!DOCTYPE html><html lang="zh-CN" class="${initialTheme}"><head><meta charset="UTF-8"><title>笔记快照: ${title.replace(/</g, "&lt;")} </title><meta name="viewport" content="width=device-width, initial-scale=1.0"><script src="https://cdn.tailwindcss.com"><\/script><script src="https://unpkg.com/lucide@latest"><\/script></head><body class="bg-gray-100 dark:bg-gray-900 antialiased font-sans"><main class="max-w-4xl mx-auto p-4 sm:p-8"><div class="flex justify-end items-center mb-4 gap-2"><a href=${safe(redirectUrl)} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition-colors">在编辑器中打开<\/a><button id="theme-btn" class="w-9 h-9 flex items-center justify-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition-colors"><\/button><\/div><div class="bg-white dark:bg-gray-800 p-5 sm:p-8 rounded-lg shadow"><h1 id="s-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-4 mb-4"></h1><div id="s-content" class="text-gray-800 dark:text-gray-200 text-base leading-relaxed whitespace-pre-wrap"></div></div></main><script>
+                document.getElementById('s-title').innerText = ${safe(title)};
+                document.getElementById('s-content').innerText = ${safe(content)};
+                const themeBtn = document.getElementById('theme-btn');
+                const docEl = document.documentElement;
+                const applyTheme = (t) => {
+                    docEl.className = t;
+                    themeBtn.innerHTML = t === 'dark' ? '<i data-lucide="sun" class="w-5 h-5"><\\/i>' : '<i data-lucide="moon" class="w-5 h-5"><\\/i>';
+                    lucide.createIcons();
+                };
+                themeBtn.addEventListener('click', () => applyTheme(docEl.classList.contains('dark') ? 'light' : 'dark'));
+                applyTheme(docEl.className);
+                <\/script></body></html>`;
+            },
+            generateLinks() {
+                const title = DOMElements.noteTitle.innerText;
+                const content = DOMElements.noteContent.innerText;
+                
+                const fullText = `${title}${CONFIG.NOTE_SEPARATOR}${content}`;
+                const encodedText = btoa(unescape(encodeURIComponent(fullText)));
+                
+                const redirectUrl = `${CONFIG.DEPLOY_URL}?note=${encodedText}`;
+                
+                const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                const snapshotHtml = this.createSnapshotHtml(title, content, redirectUrl, currentTheme);
+                const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(snapshotHtml)}`;
+
+                if (dataUrl.length > CONFIG.URL_MAX_LENGTH) {
+                    showToast('笔记内容太长，无法生成分享链接！', { isError: true });
+                    return null;
+                }
+                
+                return { dataUrl, redirectUrl };
+            }
+        };
+
+        // --- 6. 事件处理与初始化 ---
+
+        const openShareModal = () => {
+            const links = ShareManager.generateLinks();
+            if (!links) return;
+
+            DOMElements.modal.dataUrlInput.value = links.dataUrl;
+            DOMElements.modal.redirectUrlInput.value = links.redirectUrl;
+            
+            DOMElements.modal.overlay.classList.add('visible');
+        };
+
+        const closeShareModal = () => {
+            DOMElements.modal.overlay.classList.remove('visible');
+        };
+
+        const debouncedSave = debounce(StorageManager.save, CONFIG.AUTO_SAVE_DEBOUNCE);
+
+        const initEventListeners = () => {
+            DOMElements.noteTitle.addEventListener('input', debouncedSave);
+            DOMElements.noteContent.addEventListener('input', debouncedSave);
+            DOMElements.themeToggleBtn.addEventListener('click', () => ThemeManager.toggle());
+            DOMElements.shareBtn.addEventListener('click', openShareModal);
+            
+            // Modal events
+            DOMElements.modal.closeBtn.addEventListener('click', closeShareModal);
+            DOMElements.modal.overlay.addEventListener('click', (e) => {
+                if (e.target === DOMElements.modal.overlay) {
+                    closeShareModal();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && DOMElements.modal.overlay.classList.contains('visible')) {
+                    closeShareModal();
+                }
+            });
+
+            // Copy buttons
+            DOMElements.modal.copyDataUrlBtn.addEventListener('click', () => copyToClipboard(DOMElements.modal.dataUrlInput.value, '离线快照地址'));
+            DOMElements.modal.copyRedirectUrlBtn.addEventListener('click', () => copyToClipboard(DOMElements.modal.redirectUrlInput.value, '在线链接'));
+        };
+
+        const loadNoteFromURL = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            // [优化] 使用 'note' 作为参数名，比 'text' 更具描述性
+            if (urlParams.has('note')) {
+                const encodedText = urlParams.get('note');
+                try {
+                    const decodedText = decodeURIComponent(escape(atob(encodedText)));
+                    const [title = '', content = ''] = decodedText.split(CONFIG.NOTE_SEPARATOR);
+                    
+                    DOMElements.noteTitle.innerText = title;
+                    DOMElements.noteContent.innerText = content;
+
+                    // 清理URL，避免刷新时重复加载
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    StorageManager.save(); // 保存到本地
+                } catch (e) {
+                    console.error("解析URL参数失败:", e);
+                    showToast("加载笔记失败，链接可能已损坏。", { isError: true });
+                    StorageManager.load(); // 从本地加载作为后备
+                }
+            } else {
+                StorageManager.load();
+            }
+        };
+
+        /* 应用初始化函数 */
+        const init = () => {
+            document.removeEventListener('DOMContentLoaded', init); // 确保只运行一次
+            ThemeManager.init();
+            loadNoteFromURL();
+            initEventListeners();
+            lucide.createIcons(); // 最后统一创建所有图标
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+    })();
+    </script>
+</body>
+</html>
