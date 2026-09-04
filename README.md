@@ -76,10 +76,10 @@ The share links are generated from `window.location.origin + pathname`, so they 
 ## ⚙️ How It Works
 
 ```
-┌────────────────────┐   input (debounced)   ┌──────────────────┐
+┌────────────────────┐   input (debounced)    ┌──────────────────┐
 │  contenteditable   │ ────────────────────▶ │   localStorage   │
 │  title + content   │ ◀──────────────────── │  (auto-restore)  │
-└─────────┬──────────┘        load           └──────────────────┘
+└─────────┬──────────┘        load            └──────────────────┘
           │  Share
           ▼
   title + "\n[---NOTE-SEPARATOR---]\n" + content
