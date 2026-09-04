@@ -9,7 +9,7 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](./LICENSE)
 [![Deploy to GitHub Pages](https://github.com/lingyicute/Serverless-Notepad/actions/workflows/static.yml/badge.svg)](https://github.com/lingyicute/Serverless-Notepad/actions/workflows/static.yml)
 ![Single File](https://img.shields.io/badge/size-1%20HTML%20file-success)
-![No Backend](https://img.shields.io/badge/backend-none-lightgrey)
+![No Backend](https://img.shields.io/badge/backend-none-success)
 
 **[🚀 在线体验](https://np.92li.uk)**
 
