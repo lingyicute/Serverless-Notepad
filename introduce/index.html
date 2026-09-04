@@ -11,13 +11,6 @@
         @custom-variant dark (&:where(.dark, .dark *));
     </style>
     <style>
-      @font-face{
-        font-family:"Nebulove";
-        src:url("https://raw.githubusercontent.com/lingyicute/Nebulove/main/Nebulove.ttf") format("truetype");
-        font-display:swap;
-      }
-    </style>
-    <style>
         :root {
             --bg: 249 250 251;          /* gray-50 */
             --fg: 17 24 39;             /* gray-900 */
@@ -113,6 +106,16 @@
         pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
 
         html { scroll-behavior: smooth; }
+    </style>
+    <style>
+      @font-face{
+        font-family:"Nebulove";
+        src:url("https://raw.githubusercontent.com/lingyicute/Nebulove/main/Nebulove.ttf") format("truetype");
+        font-display:swap;
+      }
+      body{
+        font-family: "Nebulove", system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      }
     </style>
 </head>
 <body class="antialiased">
