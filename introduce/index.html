@@ -128,7 +128,7 @@
                 <span class="w-9 h-9 flex items-center justify-center rounded-lg text-white" style="background-color: rgb(var(--primary));">
                     <i data-lucide="notebook-pen" class="w-5 h-5"></i>
                 </span>
-                <span>小小记事本 <span class="text-primary">Pro</span></span>
+                <span data-i18n="brand">小小记事本 <span class="text-primary">Pro</span></span>
             </a>
 
             <div class="flex items-center gap-2 flex-shrink-0">
@@ -136,6 +136,7 @@
                     <i data-lucide="code-2" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">GitHub</span>
                 </a>
+                <button id="lang-toggle" aria-label="Switch to English" title="中 / EN" class="btn !p-0 w-10 h-10 justify-center text-sm font-semibold">EN</button>
                 <button id="theme-toggle" aria-label="切换深色或浅色模式" class="btn !p-0 w-10 h-10 justify-center">
                 </button>
             </div>
@@ -145,10 +146,10 @@
         <section class="mb-14">
             <div class="flex flex-wrap items-center gap-2 mb-5">
                 <span class="card text-xs font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1">
-                    <i data-lucide="file-code-2" class="w-3.5 h-3.5"></i> 1 个 HTML 文件
+                    <i data-lucide="file-code-2" class="w-3.5 h-3.5"></i> <span data-i18n="hero.badge1">1 个 HTML 文件</span>
                 </span>
                 <span class="card text-xs font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1">
-                    <i data-lucide="server-off" class="w-3.5 h-3.5"></i> 零后端
+                    <i data-lucide="server-off" class="w-3.5 h-3.5"></i> <span data-i18n="hero.badge2">零后端</span>
                 </span>
                 <span class="card text-xs font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1">
                     <i data-lucide="scale" class="w-3.5 h-3.5"></i> AGPL-3.0
@@ -158,11 +159,11 @@
                 </span>
             </div>
 
-            <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4">
+            <h1 class="text-3xl md:text-5xl font-bold leading-tight mb-4" data-i18n="hero.title">
                 一个完全活在浏览器里的<br class="hidden sm:block">
                 <span class="text-primary">Serverless</span> 记事本
             </h1>
-            <p class="text-lg leading-relaxed muted max-w-2xl mb-8">
+            <p class="text-lg leading-relaxed muted max-w-2xl mb-8" data-i18n="hero.desc">
                 没有数据库，没有 API，没有账号，无需安装。笔记保存在你自己的浏览器里，分享时把内容直接编码进链接本身。
                 把 <code class="text-sm px-1.5 py-0.5 rounded card">index.html</code> 丢到任何静态托管上就能用。
             </p>
@@ -170,15 +171,15 @@
             <div class="flex flex-wrap items-center gap-3">
                 <a href="https://np.92li.uk" target="_blank" rel="noopener" class="btn btn-primary">
                     <i data-lucide="rocket" class="w-4 h-4"></i>
-                    <span>立即使用</span>
+                    <span data-i18n="hero.cta1">立即使用</span>
                 </a>
                 <a href="https://github.com/lingyicute/Serverless-Notepad" target="_blank" rel="noopener" class="btn">
                     <i data-lucide="star" class="w-4 h-4"></i>
-                    <span>查看源码</span>
+                    <span data-i18n="hero.cta2">查看源码</span>
                 </a>
                 <a href="#quickstart" class="btn">
                     <i data-lucide="download" class="w-4 h-4"></i>
-                    <span>部署自己的副本</span>
+                    <span data-i18n="hero.cta3">部署自己的副本</span>
                 </a>
             </div>
         </section>
@@ -186,108 +187,108 @@
         <!-- 编辑器预览 -->
         <section class="mb-16">
             <div class="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-                <div class="text-2xl md:text-3xl font-bold w-full">我的第一条笔记</div>
+                <div class="text-2xl md:text-3xl font-bold w-full" data-i18n="preview.title">我的第一条笔记</div>
                 <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
                     <span class="btn text-sm pointer-events-none">
                         <i data-lucide="share-2" class="w-4 h-4"></i>
-                        <span>分享</span>
+                        <span data-i18n="preview.share">分享</span>
                     </span>
                     <span class="btn !p-0 w-10 h-10 justify-center pointer-events-none">
                         <i data-lucide="moon" class="w-4 h-4"></i>
                     </span>
                 </div>
             </div>
-            <div class="note-area w-full p-5 text-lg leading-relaxed whitespace-pre-wrap min-h-[220px] cursor-text">点击标题设置名字，点击这里开始写。
+            <div class="note-area w-full p-5 text-lg leading-relaxed whitespace-pre-wrap min-h-[220px] cursor-text" data-i18n="preview.body">点击标题设置名字，点击这里开始写。
 一切都会自动保存到 localStorage，关掉标签页也不会丢。
 
 想分享？点右上角「分享」，选择离线快照或在线链接。<span class="caret"></span></div>
             <p class="text-sm muted mt-3 flex items-center gap-1.5">
                 <i data-lucide="info" class="w-4 h-4"></i>
-                这是界面预览。真正的编辑器请前往
+                <span data-i18n="preview.hint">这是界面预览。真正的编辑器请前往</span>
                 <a href="https://np.92li.uk" target="_blank" rel="noopener" class="text-primary underline underline-offset-2">np.92li.uk</a>
             </p>
         </section>
 
         <!-- 功能特性 -->
         <section id="features" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-2">功能特性</h2>
-            <p class="muted mb-6">小而全，每一项都只用原生 HTML / CSS / JavaScript 完成。</p>
+            <h2 class="text-2xl md:text-3xl font-bold mb-2" data-i18n="features.title">功能特性</h2>
+            <p class="muted mb-6" data-i18n="features.sub">小而全，每一项都只用原生 HTML / CSS / JavaScript 完成。</p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="card rounded-xl p-5 shadow-sm">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-primary" style="background-color: rgb(var(--primary) / 0.12);">
                         <i data-lucide="save" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="font-semibold mb-1">自动保存</h3>
-                    <p class="text-sm muted leading-relaxed">标题与正文防抖 500 ms 后写入 localStorage。关闭标签页，下次回来一切如旧。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="f1.title">自动保存</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="f1.desc">标题与正文防抖 500 ms 后写入 localStorage。关闭标签页，下次回来一切如旧。</p>
                 </div>
                 <div class="card rounded-xl p-5 shadow-sm">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-primary" style="background-color: rgb(var(--primary) / 0.12);">
                         <i data-lucide="sun-moon" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="font-semibold mb-1">深色 / 浅色主题</h3>
-                    <p class="text-sm muted leading-relaxed">首次访问跟随系统偏好；一键切换并记住你的选择。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="f2.title">深色 / 浅色主题</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="f2.desc">首次访问跟随系统偏好；一键切换并记住你的选择。</p>
                 </div>
                 <div class="card rounded-xl p-5 shadow-sm">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-primary" style="background-color: rgb(var(--primary) / 0.12);">
                         <i data-lucide="link" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="font-semibold mb-1">在线分享链接</h3>
-                    <p class="text-sm muted leading-relaxed">生成普通 URL（<code>?note=&lt;base64&gt;</code>），任何人点开即可在编辑器中查看。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="f3.title">在线分享链接</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="f3.desc">生成普通 URL（<code>?note=&lt;base64&gt;</code>），任何人点开即可在编辑器中查看。</p>
                 </div>
                 <div class="card rounded-xl p-5 shadow-sm">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-primary" style="background-color: rgb(var(--primary) / 0.12);">
                         <i data-lucide="package" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="font-semibold mb-1">离线快照</h3>
-                    <p class="text-sm muted leading-relaxed">生成自包含的 <code>data:text/html</code> URL —— 一份带主题的只读副本，无需任何服务器即可打开。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="f4.title">离线快照</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="f4.desc">生成自包含的 <code>data:text/html</code> URL —— 一份带主题的只读副本，无需任何服务器即可打开。</p>
                 </div>
                 <div class="card rounded-xl p-5 shadow-sm">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-primary" style="background-color: rgb(var(--primary) / 0.12);">
                         <i data-lucide="clipboard-copy" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="font-semibold mb-1">一键复制</h3>
-                    <p class="text-sm muted leading-relaxed">Clipboard API，并为非安全上下文提供 execCommand 回退。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="f5.title">一键复制</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="f5.desc">Clipboard API，并为非安全上下文提供 execCommand 回退。</p>
                 </div>
                 <div class="card rounded-xl p-5 shadow-sm">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-primary" style="background-color: rgb(var(--primary) / 0.12);">
                         <i data-lucide="feather" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="font-semibold mb-1">响应式 & 超轻量</h3>
-                    <p class="text-sm muted leading-relaxed">手机、平板、桌面都好用。约 20 KB，无构建步骤，无框架。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="f6.title">响应式 & 超轻量</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="f6.desc">手机、平板、桌面都好用。约 20 KB，无构建步骤，无框架。</p>
                 </div>
             </div>
         </section>
 
         <!-- 工作原理 -->
         <section id="how" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-2">工作原理</h2>
-            <p class="muted mb-6">整个流程只有三步：编辑、存储、编码进链接。</p>
+            <h2 class="text-2xl md:text-3xl font-bold mb-2" data-i18n="how.title">工作原理</h2>
+            <p class="muted mb-6" data-i18n="how.sub">整个流程只有三步：编辑、存储、编码进链接。</p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="card rounded-xl p-5 shadow-sm relative">
                     <span class="absolute top-4 right-4 text-xs font-bold placeholder">01</span>
                     <i data-lucide="pencil-line" class="w-6 h-6 text-primary mb-3"></i>
-                    <h3 class="font-semibold mb-1">contenteditable 编辑</h3>
-                    <p class="text-sm muted leading-relaxed">标题与正文都是可编辑区域，输入事件防抖后写入。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="how1.title">contenteditable 编辑</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="how1.desc">标题与正文都是可编辑区域，输入事件防抖后写入。</p>
                 </div>
                 <div class="card rounded-xl p-5 shadow-sm relative">
                     <span class="absolute top-4 right-4 text-xs font-bold placeholder">02</span>
                     <i data-lucide="database" class="w-6 h-6 text-primary mb-3"></i>
-                    <h3 class="font-semibold mb-1">localStorage 持久化</h3>
-                    <p class="text-sm muted leading-relaxed">页面加载时自动恢复，数据从不离开你的浏览器。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="how2.title">localStorage 持久化</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="how2.desc">页面加载时自动恢复，数据从不离开你的浏览器。</p>
                 </div>
                 <div class="card rounded-xl p-5 shadow-sm relative">
                     <span class="absolute top-4 right-4 text-xs font-bold placeholder">03</span>
                     <i data-lucide="binary" class="w-6 h-6 text-primary mb-3"></i>
-                    <h3 class="font-semibold mb-1">Base64 / Data-URL</h3>
-                    <p class="text-sm muted leading-relaxed">标题 + 分隔符 + 正文 → UTF-8 → base64，或内联成只读 HTML 快照。</p>
+                    <h3 class="font-semibold mb-1" data-i18n="how3.title">Base64 / Data-URL</h3>
+                    <p class="text-sm muted leading-relaxed" data-i18n="how3.desc">标题 + 分隔符 + 正文 → UTF-8 → base64，或内联成只读 HTML 快照。</p>
                 </div>
             </div>
 
             <div class="card rounded-xl shadow-sm overflow-hidden">
                 <div class="flex items-center gap-2 px-4 py-2 border-b border-theme text-xs font-semibold muted">
-                    <i data-lucide="git-branch" class="w-3.5 h-3.5"></i> 数据流
+                    <i data-lucide="git-branch" class="w-3.5 h-3.5"></i> <span data-i18n="how.flow">数据流</span>
                 </div>
                 <pre class="p-4 text-xs sm:text-sm overflow-x-auto leading-relaxed"><code>┌────────────────────┐   input (debounced)    ┌──────────────────┐
 │  contenteditable   │ ────────────────────▶ │   localStorage   │
@@ -305,32 +306,32 @@
 
         <!-- 分享方式对比 -->
         <section id="share" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-2">两种分享方式</h2>
-            <p class="muted mb-6">点击「分享」后可以任选其一。</p>
+            <h2 class="text-2xl md:text-3xl font-bold mb-2" data-i18n="share.title">两种分享方式</h2>
+            <p class="muted mb-6" data-i18n="share.sub">点击「分享」后可以任选其一。</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="card rounded-2xl p-6 shadow-sm">
                     <p class="font-semibold flex items-center gap-2">
                         <i data-lucide="package" class="w-4 h-4 text-primary"></i>
-                        方式一：离线快照 (Data-URL)
+                        <span data-i18n="share1.title">方式一：离线快照 (Data-URL)</span>
                     </p>
-                    <p class="text-sm muted mt-1 mb-4">完全独立，像一个文件，可随时离线打开，内含「在编辑器中打开」按钮。</p>
+                    <p class="text-sm muted mt-1 mb-4" data-i18n="share1.desc">完全独立，像一个文件，可随时离线打开，内含「在编辑器中打开」按钮。</p>
                     <ul class="text-sm space-y-2">
-                        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0"></i><span>无需任何服务器，永久可用</span></li>
-                        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0"></i><span>自带主题切换</span></li>
-                        <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 mt-0.5 text-red-500 flex-shrink-0"></i><span>链接很长，必须粘贴到 <strong>浏览器地址栏</strong> 才能打开</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0"></i><span data-i18n="share1.li1">无需任何服务器，永久可用</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0"></i><span data-i18n="share1.li2">自带主题切换</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 mt-0.5 text-red-500 flex-shrink-0"></i><span data-i18n="share1.li3">链接很长，必须粘贴到 <strong>浏览器地址栏</strong> 才能打开</span></li>
                     </ul>
                 </div>
                 <div class="card rounded-2xl p-6 shadow-sm">
                     <p class="font-semibold flex items-center gap-2">
                         <i data-lucide="link" class="w-4 h-4 text-primary"></i>
-                        方式二：在线链接 (Redirect-URL)
+                        <span data-i18n="share2.title">方式二：在线链接 (Redirect-URL)</span>
                     </p>
-                    <p class="text-sm muted mt-1 mb-4">标准可点击的网页链接，直接在编辑器中打开笔记。</p>
+                    <p class="text-sm muted mt-1 mb-4" data-i18n="share2.desc">标准可点击的网页链接，直接在编辑器中打开笔记。</p>
                     <ul class="text-sm space-y-2">
-                        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0"></i><span>在聊天软件中可直接点击</span></li>
-                        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0"></i><span>打开后自动保存到本地并清理 URL</span></li>
-                        <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 mt-0.5 text-red-500 flex-shrink-0"></i><span>依赖本站点可访问</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0"></i><span data-i18n="share2.li1">在聊天软件中可直接点击</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0"></i><span data-i18n="share2.li2">打开后自动保存到本地并清理 URL</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 mt-0.5 text-red-500 flex-shrink-0"></i><span data-i18n="share2.li3">依赖本站点可访问</span></li>
                     </ul>
                 </div>
             </div>
@@ -338,35 +339,35 @@
 
         <!-- 快速开始 -->
         <section id="quickstart" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-2">快速开始</h2>
-            <p class="muted mb-6">在线用、本地跑、或者 Fork 一份部署到自己的 GitHub Pages。</p>
+            <h2 class="text-2xl md:text-3xl font-bold mb-2" data-i18n="qs.title">快速开始</h2>
+            <p class="muted mb-6" data-i18n="qs.sub">在线用、本地跑、或者 Fork 一份部署到自己的 GitHub Pages。</p>
 
             <div class="space-y-4">
                 <div class="card rounded-xl shadow-sm overflow-hidden">
                     <div class="flex items-center justify-between px-4 py-2 border-b border-theme">
-                        <span class="text-xs font-semibold muted flex items-center gap-2"><i data-lucide="terminal" class="w-3.5 h-3.5"></i> 本地运行</span>
+                        <span class="text-xs font-semibold muted flex items-center gap-2"><i data-lucide="terminal" class="w-3.5 h-3.5"></i> <span data-i18n="qs.local">本地运行</span></span>
                         <button class="copy-btn text-xs muted hover:text-primary transition-colors flex items-center gap-1" data-copy="git clone https://github.com/lingyicute/Serverless-Notepad.git
 cd Serverless-Notepad
 python3 -m http.server 8080">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> <span data-i18n="qs.copy">复制</span>
                         </button>
                     </div>
                     <pre class="p-4 text-sm overflow-x-auto leading-relaxed"><code>git clone https://github.com/lingyicute/Serverless-Notepad.git
 cd Serverless-Notepad
-<span class="muted"># 直接双击 index.html，或者起一个静态服务：</span>
+<span class="muted" data-i18n="qs.comment"># 直接双击 index.html，或者起一个静态服务：</span>
 python3 -m http.server 8080</code></pre>
                 </div>
 
                 <div class="card rounded-xl p-5 shadow-sm">
-                    <p class="font-semibold mb-3 flex items-center gap-2"><i data-lucide="git-fork" class="w-4 h-4 text-primary"></i> 部署你自己的副本</p>
+                    <p class="font-semibold mb-3 flex items-center gap-2"><i data-lucide="git-fork" class="w-4 h-4 text-primary"></i> <span data-i18n="qs.deploy">部署你自己的副本</span></p>
                     <ol class="text-sm space-y-2 list-none">
-                        <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center flex-shrink-0" style="background-color: rgb(var(--primary));">1</span><span><strong>Fork</strong> 这个仓库。</span></li>
-                        <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center flex-shrink-0" style="background-color: rgb(var(--primary));">2</span><span>进入 <strong>Settings → Pages</strong>，将来源设置为 <strong>GitHub Actions</strong>。</span></li>
-                        <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center flex-shrink-0" style="background-color: rgb(var(--primary));">3</span><span>推送到 <code>main</code>，内置的工作流 <code>.github/workflows/static.yml</code> 会自动发布。</span></li>
+                        <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center flex-shrink-0" style="background-color: rgb(var(--primary));">1</span><span data-i18n="qs.step1"><strong>Fork</strong> 这个仓库。</span></li>
+                        <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center flex-shrink-0" style="background-color: rgb(var(--primary));">2</span><span data-i18n="qs.step2">进入 <strong>Settings → Pages</strong>，将来源设置为 <strong>GitHub Actions</strong>。</span></li>
+                        <li class="flex items-start gap-3"><span class="w-5 h-5 rounded-full text-white text-xs flex items-center justify-center flex-shrink-0" style="background-color: rgb(var(--primary));">3</span><span data-i18n="qs.step3">推送到 <code>main</code>，内置的工作流 <code>.github/workflows/static.yml</code> 会自动发布。</span></li>
                     </ol>
                     <p class="text-sm muted mt-4 flex items-start gap-2">
                         <i data-lucide="lightbulb" class="w-4 h-4 mt-0.5 flex-shrink-0"></i>
-                        <span>分享链接由 <code>window.location.origin + pathname</code> 生成，无需任何配置即指向你自己的部署。Tailwind 与 Lucide 通过公共 CDN 加载，需联网获取样式与图标。</span>
+                        <span data-i18n="qs.tip">分享链接由 <code>window.location.origin + pathname</code> 生成，无需任何配置即指向你自己的部署。Tailwind 与 Lucide 通过公共 CDN 加载，需联网获取样式与图标。</span>
                     </p>
                 </div>
             </div>
@@ -374,41 +375,41 @@ python3 -m http.server 8080</code></pre>
 
         <!-- 隐私与限制 -->
         <section id="privacy" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-2">限制与隐私</h2>
-            <p class="muted mb-6">诚实说明，用得安心。</p>
+            <h2 class="text-2xl md:text-3xl font-bold mb-2" data-i18n="privacy.title">限制与隐私</h2>
+            <p class="muted mb-6" data-i18n="privacy.sub">诚实说明，用得安心。</p>
             <div class="card rounded-xl p-5 shadow-sm">
                 <ul class="text-sm space-y-3">
-                    <li class="flex items-start gap-3"><i data-lucide="shield-check" class="w-4 h-4 mt-0.5 text-primary flex-shrink-0"></i><span>笔记<strong>只</strong>存储在你浏览器的 <code>localStorage</code> 中，清除站点数据会将其删除。绝不会向服务器发送任何内容。</span></li>
-                    <li class="flex items-start gap-3"><i data-lucide="eye" class="w-4 h-4 mt-0.5 text-primary flex-shrink-0"></i><span>分享链接以 base64 明文包含<strong>整条笔记</strong>，拿到链接的人都能阅读。请勿以此分享敏感信息。</span></li>
-                    <li class="flex items-start gap-3"><i data-lucide="ruler" class="w-4 h-4 mt-0.5 text-primary flex-shrink-0"></i><span>过大的笔记可能超出浏览器 URL 长度限制（尤其是 Data-URL 快照）；超过约 1.8 M 字符会被友好地拒绝。</span></li>
-                    <li class="flex items-start gap-3"><i data-lucide="file" class="w-4 h-4 mt-0.5 text-primary flex-shrink-0"></i><span>同一时间只保留一条笔记；打开分享链接会替换当前笔记。</span></li>
+                    <li class="flex items-start gap-3"><i data-lucide="shield-check" class="w-4 h-4 mt-0.5 text-primary flex-shrink-0"></i><span data-i18n="privacy.p1">笔记<strong>只</strong>存储在你浏览器的 <code>localStorage</code> 中，清除站点数据会将其删除。绝不会向服务器发送任何内容。</span></li>
+                    <li class="flex items-start gap-3"><i data-lucide="eye" class="w-4 h-4 mt-0.5 text-primary flex-shrink-0"></i><span data-i18n="privacy.p2">分享链接以 base64 明文包含<strong>整条笔记</strong>，拿到链接的人都能阅读。请勿以此分享敏感信息。</span></li>
+                    <li class="flex items-start gap-3"><i data-lucide="ruler" class="w-4 h-4 mt-0.5 text-primary flex-shrink-0"></i><span data-i18n="privacy.p3">过大的笔记可能超出浏览器 URL 长度限制（尤其是 Data-URL 快照）；超过约 1.8 M 字符会被友好地拒绝。</span></li>
+                    <li class="flex items-start gap-3"><i data-lucide="file" class="w-4 h-4 mt-0.5 text-primary flex-shrink-0"></i><span data-i18n="privacy.p4">同一时间只保留一条笔记；打开分享链接会替换当前笔记。</span></li>
                 </ul>
             </div>
         </section>
 
         <!-- 技术栈 -->
         <section id="stack" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-6">技术栈</h2>
+            <h2 class="text-2xl md:text-3xl font-bold mb-6" data-i18n="stack.title">技术栈</h2>
             <div class="flex flex-wrap gap-2">
                 <span class="btn text-sm pointer-events-none"><i data-lucide="code-2" class="w-4 h-4"></i> Vanilla HTML / CSS / JS</span>
                 <span class="btn text-sm pointer-events-none"><i data-lucide="wind" class="w-4 h-4"></i> Tailwind CSS (CDN)</span>
                 <span class="btn text-sm pointer-events-none"><i data-lucide="shapes" class="w-4 h-4"></i> Lucide Icons</span>
                 <span class="btn text-sm pointer-events-none"><i data-lucide="workflow" class="w-4 h-4"></i> GitHub Actions → Pages</span>
-                <span class="btn text-sm pointer-events-none"><i data-lucide="box" class="w-4 h-4"></i> IIFE 作用域，无全局变量</span>
+                <span class="btn text-sm pointer-events-none"><i data-lucide="box" class="w-4 h-4"></i> <span data-i18n="stack.iife">IIFE 作用域，无全局变量</span></span>
             </div>
         </section>
 
         <!-- CTA -->
         <section class="mb-12">
             <div class="note-area p-8 text-center">
-                <h2 class="text-2xl md:text-3xl font-bold mb-3">开始写点什么吧 ✏️</h2>
-                <p class="muted mb-6">整个项目就是一个文件，参与贡献的门槛刻意很低 —— 编辑 <code>index.html</code> 就行。</p>
+                <h2 class="text-2xl md:text-3xl font-bold mb-3" data-i18n="cta.title">开始写点什么吧 ✏️</h2>
+                <p class="muted mb-6" data-i18n="cta.desc">整个项目就是一个文件，参与贡献的门槛刻意很低 —— 编辑 <code>index.html</code> 就行。</p>
                 <div class="flex flex-wrap justify-center gap-3">
                     <a href="https://np.92li.uk" target="_blank" rel="noopener" class="btn btn-primary">
-                        <i data-lucide="rocket" class="w-4 h-4"></i> 打开记事本
+                        <i data-lucide="rocket" class="w-4 h-4"></i> <span data-i18n="cta.open">打开记事本</span>
                     </a>
                     <a href="https://github.com/lingyicute/Serverless-Notepad/issues" target="_blank" rel="noopener" class="btn">
-                        <i data-lucide="message-square" class="w-4 h-4"></i> 提 Issue / PR
+                        <i data-lucide="message-square" class="w-4 h-4"></i> <span data-i18n="cta.issue">提 Issue / PR</span>
                     </a>
                 </div>
             </div>
@@ -419,8 +420,8 @@ python3 -m http.server 8080</code></pre>
             <p>© <span id="year"></span> lingyicute · Serverless Notepad · AGPL-3.0</p>
             <div class="flex items-center gap-4">
                 <a href="https://github.com/lingyicute/Serverless-Notepad" target="_blank" rel="noopener" class="hover:text-primary transition-colors flex items-center gap-1"><i data-lucide="code-2" class="w-4 h-4"></i> GitHub</a>
-                <a href="https://github.com/lingyicute/Serverless-Notepad/blob/main/README.zh-CN.md" target="_blank" rel="noopener" class="hover:text-primary transition-colors flex items-center gap-1"><i data-lucide="book-open" class="w-4 h-4"></i> 文档</a>
-                <a href="https://github.com/lingyicute/Serverless-Notepad/blob/main/LICENSE" target="_blank" rel="noopener" class="hover:text-primary transition-colors flex items-center gap-1"><i data-lucide="scale" class="w-4 h-4"></i> 许可证</a>
+                <a href="https://github.com/lingyicute/Serverless-Notepad/blob/main/README.zh-CN.md" target="_blank" rel="noopener" class="hover:text-primary transition-colors flex items-center gap-1"><i data-lucide="book-open" class="w-4 h-4"></i> <span data-i18n="footer.docs">文档</span></a>
+                <a href="https://github.com/lingyicute/Serverless-Notepad/blob/main/LICENSE" target="_blank" rel="noopener" class="hover:text-primary transition-colors flex items-center gap-1"><i data-lucide="scale" class="w-4 h-4"></i> <span data-i18n="footer.license">许可证</span></a>
             </div>
         </footer>
     </main>
@@ -431,10 +432,140 @@ python3 -m http.server 8080</code></pre>
     <script>
         (function () {
             const THEME_KEY = 'notepad-home-theme';
+            const LANG_KEY = 'notepad-home-lang';
             const root = document.documentElement;
             const toggleBtn = document.getElementById('theme-toggle');
+            const langBtn = document.getElementById('lang-toggle');
             const toast = document.getElementById('toast');
             let toastTimer = null;
+            let currentLang = 'zh';
+
+            // 国际化：中文直接取自 HTML 原文，英文来自下方词典
+            const I18N_ZH = {};
+            document.querySelectorAll('[data-i18n]').forEach(function (el) {
+                I18N_ZH[el.getAttribute('data-i18n')] = el.innerHTML;
+            });
+
+            const I18N_EN = {
+                'brand': 'Tiny Notepad <span class="text-primary">Pro</span>',
+                'hero.badge1': '1 HTML file',
+                'hero.badge2': 'Zero backend',
+                'hero.title': 'A <span class="text-primary">Serverless</span> notepad that<br class="hidden sm:block"> lives entirely in your browser',
+                'hero.desc': 'No database, no API, no account, nothing to install. Your notes live in your own browser, and sharing encodes the content right into the link itself. Drop <code class="text-sm px-1.5 py-0.5 rounded card">index.html</code> onto any static host and you\'re done.',
+                'hero.cta1': 'Use it now',
+                'hero.cta2': 'View source',
+                'hero.cta3': 'Deploy your own copy',
+                'preview.title': 'My first note',
+                'preview.share': 'Share',
+                'preview.body': 'Click the title to name it, click here to start writing.\nEverything is auto-saved to localStorage — close the tab and nothing is lost.\n\nWant to share? Hit "Share" in the top right and pick an offline snapshot or an online link.<span class="caret"></span>',
+                'preview.hint': 'This is a UI preview. The real editor lives at',
+                'features.title': 'Features',
+                'features.sub': 'Small but complete — every piece is built with nothing but vanilla HTML / CSS / JavaScript.',
+                'f1.title': 'Auto-save',
+                'f1.desc': 'Title and body are written to localStorage after a 500 ms debounce. Close the tab and everything is right where you left it.',
+                'f2.title': 'Dark / light theme',
+                'f2.desc': 'Follows your system preference on first visit; toggle with one click and your choice is remembered.',
+                'f3.title': 'Online share link',
+                'f3.desc': 'Generates a plain URL (<code>?note=&lt;base64&gt;</code>) that anyone can open to view the note in the editor.',
+                'f4.title': 'Offline snapshot',
+                'f4.desc': 'Generates a self-contained <code>data:text/html</code> URL — a themed, read-only copy that opens without any server.',
+                'f5.title': 'One-click copy',
+                'f5.desc': 'Clipboard API, with an execCommand fallback for non-secure contexts.',
+                'f6.title': 'Responsive & ultra-light',
+                'f6.desc': 'Works great on phone, tablet and desktop. About 20 KB, no build step, no framework.',
+                'how.title': 'How it works',
+                'how.sub': 'The whole flow is just three steps: edit, store, encode into a link.',
+                'how1.title': 'contenteditable editing',
+                'how1.desc': 'Both title and body are editable regions; input events are debounced before writing.',
+                'how2.title': 'localStorage persistence',
+                'how2.desc': 'Restored automatically on page load — your data never leaves your browser.',
+                'how3.title': 'Base64 / Data-URL',
+                'how3.desc': 'Title + separator + body → UTF-8 → base64, or inlined into a read-only HTML snapshot.',
+                'how.flow': 'Data flow',
+                'share.title': 'Two ways to share',
+                'share.sub': 'Pick either one after clicking "Share".',
+                'share1.title': 'Option 1: Offline snapshot (Data-URL)',
+                'share1.desc': 'Fully standalone, like a file — open it offline anytime. Includes an "Open in editor" button.',
+                'share1.li1': 'No server needed, works forever',
+                'share1.li2': 'Built-in theme toggle',
+                'share1.li3': 'Very long link — must be pasted into the <strong>browser address bar</strong> to open',
+                'share2.title': 'Option 2: Online link (Redirect-URL)',
+                'share2.desc': 'A standard clickable web link that opens the note directly in the editor.',
+                'share2.li1': 'Clickable directly in chat apps',
+                'share2.li2': 'Auto-saved locally and the URL is cleaned up after opening',
+                'share2.li3': 'Depends on this site being reachable',
+                'qs.title': 'Quick start',
+                'qs.sub': 'Use it online, run it locally, or fork and deploy to your own GitHub Pages.',
+                'qs.local': 'Run locally',
+                'qs.copy': 'Copy',
+                'qs.comment': '# Just double-click index.html, or start a static server:',
+                'qs.deploy': 'Deploy your own copy',
+                'qs.step1': '<strong>Fork</strong> this repository.',
+                'qs.step2': 'Go to <strong>Settings → Pages</strong> and set the source to <strong>GitHub Actions</strong>.',
+                'qs.step3': 'Push to <code>main</code> — the bundled workflow <code>.github/workflows/static.yml</code> publishes it automatically.',
+                'qs.tip': 'Share links are built from <code>window.location.origin + pathname</code>, so they point to your own deployment with zero configuration. Tailwind and Lucide are loaded from public CDNs, so an internet connection is required for styles and icons.',
+                'privacy.title': 'Limits & privacy',
+                'privacy.sub': 'Honest notes, so you can use it with peace of mind.',
+                'privacy.p1': 'Notes are stored <strong>only</strong> in your browser\'s <code>localStorage</code>; clearing site data deletes them. Nothing is ever sent to a server.',
+                'privacy.p2': 'Share links contain the <strong>entire note</strong> as plain base64 — anyone with the link can read it. Don\'t use it for sensitive information.',
+                'privacy.p3': 'Very large notes may exceed browser URL length limits (especially Data-URL snapshots); anything over ~1.8 M characters is politely rejected.',
+                'privacy.p4': 'Only one note is kept at a time; opening a share link replaces the current note.',
+                'stack.title': 'Tech stack',
+                'stack.iife': 'IIFE scoped, no globals',
+                'cta.title': 'Go write something ✏️',
+                'cta.desc': 'The whole project is a single file, and the bar for contributing is deliberately low — just edit <code>index.html</code>.',
+                'cta.open': 'Open the notepad',
+                'cta.issue': 'Open an Issue / PR',
+                'footer.docs': 'Docs',
+                'footer.license': 'License'
+            };
+
+            const UI_TEXT = {
+                zh: {
+                    themeLabel: '切换深色或浅色模式',
+                    langLabel: 'Switch to English',
+                    langBtn: 'EN',
+                    copied: '已复制到剪贴板 ✓',
+                    copyFailed: '复制失败，请手动复制',
+                    description: '一个零后端、单文件、完全运行在浏览器里的记事本。Made with ❤️ by lingyicute.'
+                },
+                en: {
+                    themeLabel: 'Toggle dark / light mode',
+                    langLabel: '切换到中文',
+                    langBtn: '中',
+                    copied: 'Copied to clipboard ✓',
+                    copyFailed: 'Copy failed, please copy manually',
+                    description: 'A zero-backend, single-file notepad that runs entirely in your browser. Made with ❤️ by lingyicute.'
+                }
+            };
+
+            function applyLang(lang) {
+                currentLang = lang === 'en' ? 'en' : 'zh';
+                const dict = currentLang === 'en' ? I18N_EN : I18N_ZH;
+                document.querySelectorAll('[data-i18n]').forEach(function (el) {
+                    const key = el.getAttribute('data-i18n');
+                    if (dict[key] !== undefined) el.innerHTML = dict[key];
+                });
+                const ui = UI_TEXT[currentLang];
+                root.lang = currentLang === 'en' ? 'en' : 'zh-CN';
+                toggleBtn.setAttribute('aria-label', ui.themeLabel);
+                langBtn.textContent = ui.langBtn;
+                langBtn.setAttribute('aria-label', ui.langLabel);
+                const metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc) metaDesc.setAttribute('content', ui.description);
+                if (window.lucide) lucide.createIcons();
+            }
+
+            function initLang() {
+                const saved = localStorage.getItem(LANG_KEY);
+                applyLang(saved === 'en' ? 'en' : 'zh');
+            }
+
+            langBtn.addEventListener('click', function () {
+                const next = currentLang === 'en' ? 'zh' : 'en';
+                localStorage.setItem(LANG_KEY, next);
+                applyLang(next);
+            });
 
             // 主题：首次跟随系统，之后记住选择
             function applyTheme(theme) {
@@ -492,13 +623,14 @@ python3 -m http.server 8080</code></pre>
             document.querySelectorAll('.copy-btn').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     copyText(btn.getAttribute('data-copy'))
-                        .then(function () { showToast('已复制到剪贴板 ✓'); })
-                        .catch(function () { showToast('复制失败，请手动复制', 'error'); });
+                        .then(function () { showToast(UI_TEXT[currentLang].copied); })
+                        .catch(function () { showToast(UI_TEXT[currentLang].copyFailed, 'error'); });
                 });
             });
 
             document.getElementById('year').textContent = new Date().getFullYear();
 
+            initLang();
             initTheme();
             lucide.createIcons();
         })();
