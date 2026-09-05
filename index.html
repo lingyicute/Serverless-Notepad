@@ -3,53 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://raw.githubusercontent.com/lingyicute/Serverless-Notepad/main/logo.png">
     <title>小小记事本 Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg: 249 250 251; /* gray-50 */
-            --fg: 17 24 39;    /* gray-900 */
-            --border: 209 213 219; /* gray-300 */
-            --card-bg: 255 255 255; /* white */
-            --muted-fg: 107 114 128; /* gray-500 */
-            --placeholder-fg: 156 163 175; /* gray-400 */
-            --primary: 59 130 246; /* blue-500 */
-            --primary-focus: 96 165 250; /* blue-400 */
+            --bg: 249 250 251;
+            --fg: 17 24 39;
+            --border: 209 213 219;
+            --card-bg: 255 255 255;
+            --muted-fg: 107 114 128;
+            --placeholder-fg: 156 163 175;
+            --primary: 59 130 246;
+            --primary-focus: 96 165 250;
         }
 
         .dark {
-            --bg: 17 24 39;    /* gray-900 */
-            --fg: 243 244 246; /* gray-100 */
-            --border: 55 65 81;   /* gray-700 */
-            --card-bg: 31 41 55;   /* gray-800 */
-            --muted-fg: 156 163 175; /* gray-400 */
-            --placeholder-fg: 107 114 128; /* gray-500 */
-            --primary: 96 165 250; /* blue-400 */
-            --primary-focus: 59 130 246; /* blue-500 */
+            --bg: 17 24 39;
+            --fg: 243 244 246;
+            --border: 55 65 81;
+            --card-bg: 31 41 55;
+            --muted-fg: 156 163 175;
+            --placeholder-fg: 107 114 128;
+            --primary: 96 165 250;
+            --primary-focus: 59 130 246;
         }
-
         body {
             background-color: rgb(var(--bg));
             color: rgb(var(--fg));
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-
-        /* contenteditable 的 placeholder 实现。*/
         [contenteditable]:empty:before {
             content: attr(placeholder);
             color: rgb(var(--placeholder-fg));
             pointer-events: none;
             display: block;
         }
-
-        /* 自定义Toast动画 */
         .toast-notification {
             transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
         }
-
-        /* 模态框动画 */
         #share-modal.visible {
             opacity: 1;
             pointer-events: auto;
@@ -73,7 +67,6 @@
                     <span>分享</span>
                 </button>
                 <button id="theme-toggle" aria-label="切换深色或浅色模式" class="w-10 h-10 flex items-center justify-center bg-[rgb(var(--card-bg))] border border-[rgb(var(--border))] rounded-lg shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <!-- 图标将由JS动态插入 -->
                 </button>
             </div>
         </header>
@@ -85,7 +78,6 @@
     <!-- Toast 通知 -->
     <div id="toast" class="toast-notification fixed top-[-100px] left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white font-semibold z-[1050] opacity-0" aria-live="polite"></div>
 
-    <!-- 分享模态框 -->
     <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-60 z-[1000] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
         <div id="modal-content" class="bg-[rgb(var(--card-bg))] p-6 rounded-2xl shadow-2xl w-full max-w-2xl transform scale-95 opacity-0 transition-all duration-300">
             <div class="flex justify-between items-center mb-6">
@@ -94,9 +86,7 @@
                     <i data-lucide="x" class="w-8 h-8"></i>
                 </button>
             </div>
-            
             <div class="space-y-6">
-                <!-- 方式一：离线快照 -->
                 <div>
                     <p class="font-semibold">方式一：离线快照 (Data-URL)</p>
                     <p class="text-sm text-[rgb(var(--muted-fg))] mt-1 mb-2">优点是完全独立，像一个文件，可随时离线打开。缺点是链接很长，且必须粘贴到 <strong>浏览器地址栏</strong> 才能打开。</p>
@@ -108,8 +98,6 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- 方式二：在线链接 -->
                 <div>
                     <p class="font-semibold">方式二：在线链接 (Redirect-URL)</p>
                     <p class="text-sm text-[rgb(var(--muted-fg))] mt-1 mb-2">标准的网页链接，可直接发给他人点击。缺点是依赖本站，需要网络连接才能打开。</p>
