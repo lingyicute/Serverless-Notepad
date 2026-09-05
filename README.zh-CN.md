@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📝 小小记事本 Pro · Serverless Notepad
+# 📝 小小记事本 Pro
 
 **一个零后端、单文件、完全运行在浏览器里的在线记事本。**
 
