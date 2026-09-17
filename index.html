@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/logo.png">
+    <meta name="description" content="小小记事本 Pro —— 零后端、单文件、完全离线运行在浏览器里的记事本。">
+    <link rel="icon" href="logo.png">
     <title>小小记事本 Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // 在首帧渲染前应用主题（localStorage 优先，其次跟随系统偏好），避免深色模式闪烁 (FOUC)
+        try {
+            var _t = localStorage.getItem('notepad_pro_theme');
+            if (_t === 'dark' || (_t === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (e) { /* 隐私模式等场景下忽略 */ }
+    </script>
     <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
         :root {
             --bg: 249 250 251;
             --fg: 17 24 39;
@@ -17,6 +27,12 @@
             --placeholder-fg: 156 163 175;
             --primary: 59 130 246;
             --primary-focus: 96 165 250;
+            --hover-bg: 243 244 246;
+            --input-bg: 243 244 246;
+            --btn-blue: 37 99 235;
+            --btn-blue-hover: 29 78 216;
+            --danger: 239 68 68;
+            --success: 34 197 94;
         }
 
         .dark {
@@ -28,86 +44,268 @@
             --placeholder-fg: 107 114 128;
             --primary: 96 165 250;
             --primary-focus: 59 130 246;
+            --hover-bg: 55 65 81;
+            --input-bg: 17 24 39;
         }
+
+        html { -webkit-text-size-adjust: 100%; }
         body {
+            margin: 0;
             background-color: rgb(var(--bg));
             color: rgb(var(--fg));
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        [contenteditable]:empty:before {
+        button, input { font: inherit; color: inherit; }
+        button { cursor: pointer; background: none; border: none; padding: 0; }
+        svg { display: block; }
+
+        /* ---- 布局 ---- */
+        .app {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        @media (min-width: 640px) { .app { padding: 1.5rem; } }
+        @media (min-width: 768px) { .app { padding: 2rem; } }
+
+        /* ---- 头部 ---- */
+        .header {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            align-self: flex-end;
+        }
+        @media (min-width: 640px) {
+            .header { flex-direction: row; align-items: center; }
+            .toolbar { align-self: center; }
+        }
+
+        .note-title {
+            width: 100%;
+            margin: 0;
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+            font-weight: 700;
+            outline: none;
+            cursor: text;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border-radius: 0.375rem;
+            transition: background-color 0.15s ease;
+        }
+        @media (min-width: 768px) { .note-title { font-size: 2.25rem; line-height: 2.5rem; } }
+        .note-title:focus { background-color: rgb(var(--primary) / 0.08); }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: rgb(var(--card-bg));
+            border: 1px solid rgb(var(--border));
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        .btn:hover { background-color: rgb(var(--hover-bg)); }
+        .icon-btn { width: 2.5rem; height: 2.5rem; padding: 0; justify-content: center; }
+
+        .icon-16 { width: 16px; height: 16px; }
+        .icon-20 { width: 20px; height: 20px; }
+        .icon-32 { width: 32px; height: 32px; }
+
+        .btn:focus-visible, .icon-btn:focus-visible, .copy-btn:focus-visible, .url-input:focus-visible {
+            outline: 2px solid rgb(var(--primary));
+            outline-offset: 2px;
+        }
+
+        /* ---- 编辑区 ---- */
+        .note-content {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 60vh;
+            padding: 1.25rem;
+            font-size: 1.125rem;
+            line-height: 1.625;
+            background-color: rgb(var(--card-bg));
+            border: 2px dashed rgb(var(--border));
+            border-radius: 0.75rem;
+            outline: none;
+            cursor: text;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            transition: border-color 0.2s ease;
+        }
+        .note-content:focus { border-style: solid; border-color: rgb(var(--primary)); }
+        .dark .note-content:focus { border-color: rgb(var(--primary-focus)); }
+
+        /* 占位符（清空内容后重新显示） */
+        [contenteditable][placeholder]:empty::before {
             content: attr(placeholder);
             color: rgb(var(--placeholder-fg));
             pointer-events: none;
             display: block;
         }
-        .toast-notification {
+
+        /* ---- Toast ---- */
+        .toast {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: calc(100vw - 2rem);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            color: #fff;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 1050;
+            opacity: 0;
+            pointer-events: none;
             transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
         }
-        #share-modal.visible {
-            opacity: 1;
-            pointer-events: auto;
+        .toast.show { top: 1.25rem; opacity: 1; }
+        .toast.success { background-color: rgb(var(--success)); }
+        .toast.error { background-color: rgb(var(--danger)); }
+
+        /* ---- 分享弹窗 ---- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgb(0 0 0 / 0.6);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
         }
-        #share-modal.visible #modal-content {
-            transform: scale(1);
-            opacity: 1;
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal {
+            background-color: rgb(var(--card-bg));
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            width: 100%;
+            max-width: 42rem;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
+        .modal-overlay.visible .modal { transform: scale(1); opacity: 1; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-title { margin: 0; font-size: 1.5rem; line-height: 2rem; font-weight: 700; }
+        .modal-close { color: #9ca3af; transition: color 0.2s ease; }
+        .modal-close:hover { color: rgb(var(--fg)); }
+
+        .share-option + .share-option { margin-top: 1.5rem; }
+        .share-option .label { margin: 0; font-weight: 600; }
+        .share-option .desc { margin: 0.25rem 0 0.5rem; font-size: 0.875rem; color: rgb(var(--muted-fg)); }
+        .url-row { display: flex; gap: 0.5rem; }
+        .url-row.disabled .url-input, .url-row.disabled .copy-btn { opacity: 0.5; pointer-events: none; }
+        .url-input {
+            flex: 1;
+            min-width: 0;
+            padding: 0.5rem 0.75rem;
+            background-color: rgb(var(--input-bg));
+            border: 1px solid rgb(var(--border));
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: rgb(var(--muted-fg));
+        }
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: rgb(var(--btn-blue));
+            color: #fff;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: background-color 0.2s ease;
+        }
+        .copy-btn:hover { background-color: rgb(var(--btn-blue-hover)); }
+        .warn { margin: 0.5rem 0 0; font-size: 0.875rem; color: rgb(var(--danger)); }
     </style>
 </head>
-<body class="antialiased">
+<body>
 
-    <main class="max-w-4xl mx-auto p-4 sm:p-6 md:p-8 flex flex-col min-h-screen">
+    <main class="app">
         <!-- 头部区域 -->
-        <header class="flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <h1 id="note-title" contenteditable="true" placeholder="点此编辑标题 ✏️" class="text-3xl md:text-4xl font-bold w-full focus:outline-none cursor-text text-ellipsis overflow-hidden"></h1>
-            
-            <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
-                <button id="share-btn" class="flex items-center gap-2 px-4 py-2 bg-[rgb(var(--card-bg))] border border-[rgb(var(--border))] rounded-lg shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <i data-lucide="share-2" class="w-4 h-4"></i>
+        <header class="header">
+            <h1 id="note-title" contenteditable="true" placeholder="点此编辑标题 ✏️" class="note-title" spellcheck="false"></h1>
+
+            <div class="toolbar">
+                <button id="share-btn" class="btn" type="button">
+                    <svg class="icon-16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
                     <span>分享</span>
                 </button>
-                <button id="theme-toggle" aria-label="切换深色或浅色模式" class="w-10 h-10 flex items-center justify-center bg-[rgb(var(--card-bg))] border border-[rgb(var(--border))] rounded-lg shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                </button>
+                <button id="theme-toggle" class="btn icon-btn" type="button" aria-label="切换深色或浅色模式"></button>
             </div>
         </header>
 
         <!-- 编辑区域 -->
-        <div id="note-content" contenteditable="true" placeholder="开始记录吧 ✏️" class="w-full flex-grow min-h-[60vh] p-5 text-lg leading-relaxed bg-[rgb(var(--card-bg))] border-2 border-dashed border-[rgb(var(--border))] rounded-xl focus:outline-none focus:border-solid focus:border-[rgb(var(--primary))] dark:focus:border-[rgb(var(--primary-focus))] transition-all cursor-text whitespace-pre-wrap"></div>
+        <div id="note-content" contenteditable="true" placeholder="开始记录吧 ✏️" class="note-content" spellcheck="false"></div>
     </main>
 
     <!-- Toast 通知 -->
-    <div id="toast" class="toast-notification fixed top-[-100px] left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white font-semibold z-[1050] opacity-0" aria-live="polite"></div>
+    <div id="toast" class="toast success" role="status" aria-live="polite"></div>
 
-    <div id="share-modal" class="fixed inset-0 bg-black bg-opacity-60 z-[1000] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div id="modal-content" class="bg-[rgb(var(--card-bg))] p-6 rounded-2xl shadow-2xl w-full max-w-2xl transform scale-95 opacity-0 transition-all duration-300">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">分享你的笔记</h3>
-                <button id="close-modal" aria-label="关闭分享窗口" class="text-gray-400 hover:text-[rgb(var(--fg))] transition-colors">
-                    <i data-lucide="x" class="w-8 h-8"></i>
+    <!-- 分享弹窗 -->
+    <div id="share-modal" class="modal-overlay">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+            <div class="modal-header">
+                <h3 id="share-modal-title" class="modal-title">分享你的笔记</h3>
+                <button id="close-modal" class="modal-close" type="button" aria-label="关闭分享窗口">
+                    <svg class="icon-32" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 </button>
             </div>
-            <div class="space-y-6">
-                <div>
-                    <p class="font-semibold">方式一：离线快照 (Data-URL)</p>
-                    <p class="text-sm text-[rgb(var(--muted-fg))] mt-1 mb-2">优点是完全独立，像一个文件，可随时离线打开。缺点是链接很长，且必须粘贴到 <strong>浏览器地址栏</strong> 才能打开。</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="data-url-input" readonly class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900 border border-[rgb(var(--border))] rounded-md text-sm text-[rgb(var(--muted-fg))]">
-                        <button id="copy-data-url-btn" class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
+            <div>
+                <div id="data-url-section" class="share-option">
+                    <p class="label">方式一：离线快照 (Data-URL)</p>
+                    <p class="desc">优点是完全独立，像一个文件，可随时离线打开。缺点是链接很长，且必须粘贴到 <strong>浏览器地址栏</strong> 才能打开。</p>
+                    <div class="url-row" id="data-url-row">
+                        <input type="text" id="data-url-input" readonly aria-label="离线快照地址" class="url-input">
+                        <button id="copy-data-url-btn" class="copy-btn" type="button">
+                            <svg class="icon-16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                             <span>复制</span>
                         </button>
                     </div>
+                    <p class="warn" id="data-url-warn" hidden></p>
                 </div>
-                <div>
-                    <p class="font-semibold">方式二：在线链接 (Redirect-URL)</p>
-                    <p class="text-sm text-[rgb(var(--muted-fg))] mt-1 mb-2">标准的网页链接，可直接发给他人点击。缺点是依赖本站，需要网络连接才能打开。</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="redirect-url-input" readonly class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900 border border-[rgb(var(--border))] rounded-md text-sm text-[rgb(var(--muted-fg))]">
-                        <button id="copy-redirect-url-btn" class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
+                <div id="redirect-url-section" class="share-option">
+                    <p class="label">方式二：在线链接 (Redirect-URL)</p>
+                    <p class="desc">标准的网页链接，可直接发给他人点击。缺点是依赖本站，需要网络连接才能打开。</p>
+                    <div class="url-row" id="redirect-url-row">
+                        <input type="text" id="redirect-url-input" readonly aria-label="在线链接" class="url-input">
+                        <button id="copy-redirect-url-btn" class="copy-btn" type="button">
+                            <svg class="icon-16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                             <span>复制</span>
                         </button>
                     </div>
+                    <p class="warn" id="redirect-url-warn" hidden></p>
                 </div>
             </div>
         </div>
@@ -115,6 +313,8 @@
 
     <script>
     (() => {
+        'use strict';
+
         // --- 1. 常量与配置 ---
         const CONFIG = {
             STORAGE_KEYS: {
@@ -126,91 +326,119 @@
             NOTE_SEPARATOR: '\n[---NOTE-SEPARATOR---]\n',
             AUTO_SAVE_DEBOUNCE: 500,
             TOAST_DURATION: 3000,
-            DEPLOY_URL: window.location.origin + window.location.pathname,
         };
+        const DEPLOY_URL = window.location.origin + window.location.pathname;
 
         // --- 2. DOM 元素缓存 ---
+        const $ = (id) => document.getElementById(id);
         const DOMElements = {
-            noteTitle: document.getElementById('note-title'),
-            noteContent: document.getElementById('note-content'),
-            shareBtn: document.getElementById('share-btn'),
-            themeToggleBtn: document.getElementById('theme-toggle'),
-            toast: document.getElementById('toast'),
-            modal: {
-                overlay: document.getElementById('share-modal'),
-                content: document.getElementById('modal-content'),
-                closeBtn: document.getElementById('close-modal'),
-                dataUrlInput: document.getElementById('data-url-input'),
-                copyDataUrlBtn: document.getElementById('copy-data-url-btn'),
-                redirectUrlInput: document.getElementById('redirect-url-input'),
-                copyRedirectUrlBtn: document.getElementById('copy-redirect-url-btn'),
-            }
+            noteTitle: $('note-title'),
+            noteContent: $('note-content'),
+            shareBtn: $('share-btn'),
+            themeToggleBtn: $('theme-toggle'),
+            toast: $('toast'),
+            modalOverlay: $('share-modal'),
+            modalClose: $('close-modal'),
+            dataUrlRow: $('data-url-row'),
+            dataUrlInput: $('data-url-input'),
+            dataUrlWarn: $('data-url-warn'),
+            copyDataUrlBtn: $('copy-data-url-btn'),
+            redirectUrlRow: $('redirect-url-row'),
+            redirectUrlInput: $('redirect-url-input'),
+            redirectUrlWarn: $('redirect-url-warn'),
+            copyRedirectUrlBtn: $('copy-redirect-url-btn'),
         };
 
-        // --- 3. 状态管理 ---
+        const SVG_ATTRS = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+        const Icons = {
+            sun: `<svg class="icon-20" ${SVG_ATTRS}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+            moon: `<svg class="icon-20" ${SVG_ATTRS}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`,
+        };
+
         const AppState = {
             toastTimer: null,
+            lastFocused: null,
         };
 
-        // --- 4. 辅助函数 ---
-        const showToast = (message, { isError = false } = {}) => {
-            clearTimeout(AppState.toastTimer);
-            DOMElements.toast.textContent = message;
-            
-            const baseClasses = 'toast-notification fixed top-[-100px] left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white font-semibold z-[1050] opacity-0';
-            const colorClass = isError ? 'bg-red-500' : 'bg-green-500';
-            DOMElements.toast.className = `${baseClasses} ${colorClass}`;
-            
-            void DOMElements.toast.offsetWidth;
+        // --- 3. 工具函数 ---
+        // 使用 innerText 读取，可正确保留换行（contenteditable 回车产生的 <div>/<br> 会折叠为 \n）
+        const getPlainText = (el) => el.innerText;
 
-            DOMElements.toast.classList.replace('top-[-100px]', 'top-5');
-            DOMElements.toast.classList.replace('opacity-0', 'opacity-100');
-
-            AppState.toastTimer = setTimeout(() => {
-                DOMElements.toast.classList.replace('top-5', 'top-[-100px]');
-                DOMElements.toast.classList.replace('opacity-100', 'opacity-0');
-            }, CONFIG.TOAST_DURATION);
+        // UTF-8 <-> Base64（不再使用已废弃的 escape/unescape）
+        const base64EncodeUtf8 = (str) => {
+            const bytes = new TextEncoder().encode(str);
+            let bin = '';
+            const CHUNK = 0x8000;
+            for (let i = 0; i < bytes.length; i += CHUNK) {
+                bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+            }
+            return btoa(bin);
+        };
+        const base64DecodeUtf8 = (b64) => {
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
         };
 
         const debounce = (func, delay) => {
             let timeout;
-            return function(...args) {
+            return function (...args) {
                 clearTimeout(timeout);
                 timeout = setTimeout(() => func.apply(this, args), delay);
             };
         };
 
+        // --- 4. Toast ---
+        const showToast = (message, { isError = false } = {}) => {
+            clearTimeout(AppState.toastTimer);
+            DOMElements.toast.textContent = message;
+            DOMElements.toast.classList.toggle('error', isError);
+            DOMElements.toast.classList.toggle('success', !isError);
+
+            // 强制重排以重新触发过渡动画
+            DOMElements.toast.classList.remove('show');
+            void DOMElements.toast.offsetWidth;
+            DOMElements.toast.classList.add('show');
+
+            AppState.toastTimer = setTimeout(() => {
+                DOMElements.toast.classList.remove('show');
+            }, CONFIG.TOAST_DURATION);
+        };
+
+        // --- 5. 剪贴板 ---
         const copyToClipboard = async (text, typeName) => {
             try {
                 if (navigator.clipboard && window.isSecureContext) {
                     await navigator.clipboard.writeText(text);
                 } else {
-                    const textArea = document.createElement("textarea");
+                    const textArea = document.createElement('textarea');
                     textArea.value = text;
-                    textArea.style.position = "absolute";
-                    textArea.style.left = "-9999px";
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
                     document.body.appendChild(textArea);
                     textArea.select();
-                    document.execCommand('copy');
+                    const ok = document.execCommand('copy');
                     document.body.removeChild(textArea);
+                    if (!ok) throw new Error('execCommand 复制失败');
                 }
                 showToast(`${typeName} 已复制到剪贴板！`);
                 closeShareModal();
             } catch (err) {
-                console.error("复制失败:", err);
+                console.error('复制失败:', err);
                 showToast(`复制失败: ${err.message}`, { isError: true });
             }
         };
 
-        // --- 5. 核心功能模块 ---
+        // --- 6. 本地存储 ---
         const StorageManager = {
             save() {
                 try {
-                    localStorage.setItem(CONFIG.STORAGE_KEYS.TITLE, DOMElements.noteTitle.innerText);
-                    localStorage.setItem(CONFIG.STORAGE_KEYS.CONTENT, DOMElements.noteContent.innerText);
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.TITLE, getPlainText(DOMElements.noteTitle));
+                    localStorage.setItem(CONFIG.STORAGE_KEYS.CONTENT, getPlainText(DOMElements.noteContent));
                 } catch (e) {
-                    console.error("保存到 localStorage 失败:", e);
-                    showToast("无法保存笔记，可能是存储空间已满。", { isError: true });
+                    console.error('保存到 localStorage 失败:', e);
+                    showToast('无法保存笔记，可能是存储空间已满。', { isError: true });
                 }
             },
             load() {
@@ -218,158 +446,317 @@
                 const content = localStorage.getItem(CONFIG.STORAGE_KEYS.CONTENT);
                 if (title !== null) DOMElements.noteTitle.innerText = title;
                 if (content !== null) DOMElements.noteContent.innerText = content;
-            }
+            },
         };
+        const debouncedSave = debounce(StorageManager.save, CONFIG.AUTO_SAVE_DEBOUNCE);
 
+        // --- 7. 主题 ---
         const ThemeManager = {
-            moonIcon: `<i data-lucide="moon" class="w-5 h-5"></i>`,
-            sunIcon: `<i data-lucide="sun" class="w-5 h-5"></i>`,
+            render() {
+                const isDark = document.documentElement.classList.contains('dark');
+                DOMElements.themeToggleBtn.innerHTML = isDark ? Icons.sun : Icons.moon;
+            },
             apply(theme) {
-                if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                    DOMElements.themeToggleBtn.innerHTML = this.sunIcon;
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    DOMElements.themeToggleBtn.innerHTML = this.moonIcon;
-                }
-                lucide.createIcons();
-                if (window.location.protocol !== 'data:') {
-                    localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, theme);
-                }
+                document.documentElement.classList.toggle('dark', theme === 'dark');
+                this.render();
+                try { localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, theme); } catch (e) { /* 忽略 */ }
             },
             toggle() {
-                const isDark = document.documentElement.classList.contains('dark');
-                this.apply(isDark ? 'light' : 'dark');
+                this.apply(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
             },
             init() {
-                const savedTheme = localStorage.getItem(CONFIG.STORAGE_KEYS.THEME);
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                this.apply(savedTheme || (prefersDark ? 'dark' : 'light'));
-            }
+                // .dark 类已由 <head> 中的内联脚本按 localStorage / 系统偏好设置
+                this.render();
+            },
         };
-        
+
+        // --- 8. 分享 ---
         const ShareManager = {
             createSnapshotHtml(title, content, redirectUrl, initialTheme) {
-                const safe = (str) => JSON.stringify(str).replace(/</g, "\\u003c");
-                const escTitle = title.replace(/</g, "&lt;");
-                return `<!DOCTYPE html><html lang="zh-CN" class="${initialTheme}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>小小笔记本 Pro 笔记快照</title><style>:root{--bg:249 250 251;--fg:17 24 39;--border:209 213 219;--card-bg:255 255 255;--muted-fg:107 114 128} .dark{--bg:17 24 39;--fg:243 244 246;--border:55 65 81;--card-bg:31 41 55;--muted-fg:156 163 175} *{box-sizing:border-box} body{margin:0;background-color:rgb(var(--bg));color:rgb(var(--fg));font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;transition:background-color .3s,color .3s} a,button{transition:all .2s}
-.bg-\[rgb\(var\(--bg\)\)\]{background-color:rgb(var(--bg))}
-.bg-\[rgb\(var\(--card-bg\)\)\]{background-color:rgb(var(--card-bg))}
-.border-\[rgb\(var\(--border\)\)\]{border-color:rgb(var(--border))}
-.text-\[rgb\(var\(--fg\)\)\]{color:rgb(var(--fg))}
-.max-w-4xl{max-width:56rem}.mx-auto{margin-left:auto;margin-right:auto}.p-4{padding:1rem}.sm\:p-8{padding:2rem}.flex{display:flex}.justify-end{justify-content:flex-end}.items-center{align-items:center}.gap-2{gap:0.5rem}.mb-4{margin-bottom:1rem}.rounded-md{border-radius:0.375rem}.rounded-lg{border-radius:0.5rem}.shadow{box-shadow:0 1px 3px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.1)}.border{border-width:1px;border-style:solid}.border-b{border-bottom-width:1px;border-bottom-style:solid}.p-5{padding:1.25rem}.text-sm{font-size:0.875rem}.text-base{font-size:1rem}.text-2xl{font-size:1.5rem}.leading-relaxed{line-height:1.625}.whitespace-pre-wrap{white-space:pre-wrap}.break-words{overflow-wrap:break-word}.font-bold{font-weight:700}.opacity-90{opacity:0.9}.hover\:opacity-80:hover{opacity:0.8}</style><script>try{tailwind.config={darkMode:'class'}}catch(e){}<\/script><script src="https://cdn.tailwindcss.com"><\/script><script src="https://unpkg.com/lucide@latest"><\/script></head><body class="antialiased"><main class="max-w-4xl mx-auto p-4 sm:p-8"><div class="flex justify-end items-center mb-4 gap-2"><a href=${safe(redirectUrl)} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-3 py-1.5 bg-[rgb(var(--card-bg))] border border-[rgb(var(--border))] rounded-md text-sm hover:opacity-80 text-[rgb(var(--fg))] no-underline">在编辑器中打开</a><button id="theme-btn" aria-label="切换深色或浅色模式" class="w-9 h-9 flex items-center justify-center bg-[rgb(var(--card-bg))] border border-[rgb(var(--border))] rounded-md hover:opacity-80 text-[rgb(var(--fg))]"><\/button><\/div><div class="bg-[rgb(var(--card-bg))] border border-[rgb(var(--border))] p-5 sm:p-8 rounded-lg shadow"><h1 id="s-title" class="text-2xl sm:text-3xl font-bold border-b border-[rgb(var(--border))] pb-4 mb-4 break-words"></h1><div id="s-content" class="text-base leading-relaxed whitespace-pre-wrap break-words opacity-90"></div></div></main><script>
-                document.getElementById('s-title').innerText = ${safe(title)};
-                document.getElementById('s-content').innerText = ${safe(content)};
-                const themeBtn = document.getElementById('theme-btn');
-                const docEl = document.documentElement;
-                const icons = { dark: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>', light: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>' };
-                const applyTheme = (t) => {
-                    if (t === 'dark') docEl.classList.add('dark');
-                    else docEl.classList.remove('dark');
-                    themeBtn.innerHTML = t === 'dark' ? icons.dark : icons.light;
-                    try{ if(window.lucide) lucide.createIcons(); }catch(e){}
-                };
-                themeBtn.addEventListener('click', () => {
-                    const isDark = docEl.classList.contains('dark');
-                    applyTheme(isDark ? 'light' : 'dark');
-                });
-                applyTheme(docEl.classList.contains('dark') ? 'dark' : 'light');
-                <\/script></body></html>`;
+                // 笔记数据以 JSON 注入，并对 < > 转义，防止脚本标签注入
+                const noteData = JSON.stringify({ title, content, redirectUrl })
+                    .replace(/</g, '\\u003c')
+                    .replace(/>/g, '\\u003e');
+                const openLink = redirectUrl
+                    ? `<a class="open-link" href="${redirectUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" target="_blank" rel="noopener noreferrer">在编辑器中打开</a>`
+                    : '';
+                // 快照完全自包含：内联 CSS + 内联 SVG，无任何外部请求，可真正离线打开
+                return `<!DOCTYPE html>
+<html lang="zh-CN" class="${initialTheme}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小小记事本 Pro · 笔记快照</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{--bg:249 250 251;--fg:17 24 39;--border:209 213 219;--card-bg:255 255 255;--muted-fg:107 114 128;--primary:59 130 246}
+.dark{--bg:17 24 39;--fg:243 244 246;--border:55 65 81;--card-bg:31 41 55;--muted-fg:156 163 175;--primary:96 165 250}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background-color:rgb(var(--bg));color:rgb(var(--fg));font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;transition:background-color .3s ease,color .3s ease;-webkit-font-smoothing:antialiased}
+main{max-width:56rem;margin:0 auto;padding:1rem;min-height:100vh}
+@media (min-width:640px){main{padding:2rem}}
+.topbar{display:flex;justify-content:flex-end;align-items:center;gap:.5rem;margin-bottom:1rem}
+.open-link{display:inline-flex;align-items:center;gap:.5rem;padding:.375rem .75rem;background-color:rgb(var(--card-bg));border:1px solid rgb(var(--border));border-radius:.375rem;font-size:.875rem;color:rgb(var(--fg));text-decoration:none;transition:opacity .2s ease}
+.open-link:hover{opacity:.8}
+.theme-btn{width:2.25rem;height:2.25rem;display:flex;align-items:center;justify-content:center;background-color:rgb(var(--card-bg));border:1px solid rgb(var(--border));border-radius:.375rem;color:rgb(var(--fg));cursor:pointer;transition:opacity .2s ease}
+.theme-btn:hover{opacity:.8}
+.theme-btn svg{width:18px;height:18px;display:block}
+.card{background-color:rgb(var(--card-bg));border:1px solid rgb(var(--border));border-radius:.5rem;box-shadow:0 1px 3px rgb(0 0 0 / .1),0 1px 2px rgb(0 0 0 / .1);padding:1.25rem}
+@media (min-width:640px){.card{padding:2rem}}
+.card h1{margin:0 0 1rem;font-size:1.5rem;line-height:2rem;font-weight:700;border-bottom:1px solid rgb(var(--border));padding-bottom:1rem;overflow-wrap:break-word}
+@media (min-width:640px){.card h1{font-size:1.875rem;line-height:2.25rem}}
+.card .content{font-size:1rem;line-height:1.625;white-space:pre-wrap;overflow-wrap:break-word;opacity:.9}
+</style>
+</head>
+<body>
+<main>
+<div class="topbar">${openLink}<button id="theme-btn" class="theme-btn" type="button" aria-label="切换深色或浅色模式"></button></div>
+<div class="card"><h1 id="s-title"></h1><div id="s-content" class="content"></div></div>
+</main>
+<script id="note-data" type="application/json">${noteData}<\/script>
+<script>
+(function () {
+    var note = JSON.parse(document.getElementById('note-data').textContent);
+    document.getElementById('s-title').textContent = note.title;
+    document.getElementById('s-content').textContent = note.content;
+    var themeBtn = document.getElementById('theme-btn');
+    var docEl = document.documentElement;
+    var SVG_ATTRS = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    var SUN = '<svg ' + SVG_ATTRS + '><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+    var MOON = '<svg ' + SVG_ATTRS + '><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
+    function applyTheme(t) {
+        docEl.classList.toggle('dark', t === 'dark');
+        themeBtn.innerHTML = t === 'dark' ? SUN : MOON;
+    }
+    themeBtn.addEventListener('click', function () {
+        applyTheme(docEl.classList.contains('dark') ? 'light' : 'dark');
+    });
+    applyTheme(docEl.classList.contains('dark') ? 'dark' : 'light');
+})();
+<\/script>
+</body>
+</html>`;
             },
             generateLinks() {
-                const title = DOMElements.noteTitle.innerText;
-                const content = DOMElements.noteContent.innerText;
-                
-                const fullText = `${title}${CONFIG.NOTE_SEPARATOR}${content}`;
-                const encodedText = btoa(unescape(encodeURIComponent(fullText)));
-                
-                const redirectUrl = `${CONFIG.DEPLOY_URL}?note=${encodedText}`;
-                
+                const title = getPlainText(DOMElements.noteTitle);
+                const content = getPlainText(DOMElements.noteContent);
+
+                const fullText = title + CONFIG.NOTE_SEPARATOR + content;
+                const encodedText = base64EncodeUtf8(fullText);
+
+                // 必须对 base64 做 URL 编码：base64 中的 '+' 若不编码，
+                // 会被 URLSearchParams 解码成空格，导致链接解析失败
+                const redirectUrl = `${DEPLOY_URL}?note=${encodeURIComponent(encodedText)}`;
+
                 const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
                 const snapshotHtml = this.createSnapshotHtml(title, content, redirectUrl, currentTheme);
                 const dataUrl = `data:text/html;charset=utf-8,${encodeURIComponent(snapshotHtml)}`;
 
-                if (dataUrl.length > CONFIG.URL_MAX_LENGTH) {
-                    showToast('笔记内容太长，无法生成分享链接！', { isError: true });
-                    return null;
-                }
-                
-                return { dataUrl, redirectUrl };
+                return {
+                    dataUrl,
+                    redirectUrl,
+                    dataUrlTooLong: dataUrl.length > CONFIG.URL_MAX_LENGTH,
+                    redirectUrlTooLong: redirectUrl.length > CONFIG.URL_MAX_LENGTH,
+                };
+            },
+        };
+
+        // --- 9. 分享弹窗 ---
+        const setOptionState = (row, input, warn, btn, url, tooLong, kindName) => {
+            if (tooLong) {
+                row.classList.add('disabled');
+                input.value = '';
+                btn.disabled = true;
+                warn.textContent = `${kindName}过长（约 ${(url.length / 1e6).toFixed(1)} MB），超出浏览器地址栏限制，无法使用。`;
+                warn.hidden = false;
+            } else {
+                row.classList.remove('disabled');
+                input.value = url;
+                btn.disabled = false;
+                warn.hidden = true;
             }
         };
 
-        // --- 6. 事件处理与初始化 ---
+        const getModalFocusables = () => {
+            const list = [DOMElements.modalClose];
+            if (!DOMElements.dataUrlRow.classList.contains('disabled')) {
+                list.push(DOMElements.dataUrlInput, DOMElements.copyDataUrlBtn);
+            }
+            if (!DOMElements.redirectUrlRow.classList.contains('disabled')) {
+                list.push(DOMElements.redirectUrlInput, DOMElements.copyRedirectUrlBtn);
+            }
+            return list;
+        };
+
         const openShareModal = () => {
             const links = ShareManager.generateLinks();
-            if (!links) return;
 
-            DOMElements.modal.dataUrlInput.value = links.dataUrl;
-            DOMElements.modal.redirectUrlInput.value = links.redirectUrl;
-            
-            DOMElements.modal.overlay.classList.add('visible');
+            setOptionState(
+                DOMElements.dataUrlRow, DOMElements.dataUrlInput, DOMElements.dataUrlWarn,
+                DOMElements.copyDataUrlBtn, links.dataUrl, links.dataUrlTooLong, '离线快照链接'
+            );
+            setOptionState(
+                DOMElements.redirectUrlRow, DOMElements.redirectUrlInput, DOMElements.redirectUrlWarn,
+                DOMElements.copyRedirectUrlBtn, links.redirectUrl, links.redirectUrlTooLong, '在线链接'
+            );
+
+            if (links.dataUrlTooLong && links.redirectUrlTooLong) {
+                showToast('笔记内容太长，无法生成分享链接！', { isError: true });
+                return;
+            }
+            if (links.dataUrlTooLong) {
+                showToast('离线快照过长，已改用在线链接。', { isError: true });
+            }
+
+            // 打开时移动焦点，关闭时归还焦点（可访问性）
+            AppState.lastFocused = document.activeElement;
+            DOMElements.modalOverlay.classList.add('visible');
+            DOMElements.modalClose.focus();
         };
 
         const closeShareModal = () => {
-            DOMElements.modal.overlay.classList.remove('visible');
-        };
-
-        const debouncedSave = debounce(StorageManager.save, CONFIG.AUTO_SAVE_DEBOUNCE);
-
-        const initEventListeners = () => {
-            DOMElements.noteTitle.addEventListener('input', debouncedSave);
-            DOMElements.noteContent.addEventListener('input', debouncedSave);
-            DOMElements.themeToggleBtn.addEventListener('click', () => ThemeManager.toggle());
-            DOMElements.shareBtn.addEventListener('click', openShareModal);
-            
-            DOMElements.modal.closeBtn.addEventListener('click', closeShareModal);
-            DOMElements.modal.overlay.addEventListener('click', (e) => {
-                if (e.target === DOMElements.modal.overlay) {
-                    closeShareModal();
-                }
-            });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && DOMElements.modal.overlay.classList.contains('visible')) {
-                    closeShareModal();
-                }
-            });
-
-            DOMElements.modal.copyDataUrlBtn.addEventListener('click', () => copyToClipboard(DOMElements.modal.dataUrlInput.value, '离线快照地址'));
-            DOMElements.modal.copyRedirectUrlBtn.addEventListener('click', () => copyToClipboard(DOMElements.modal.redirectUrlInput.value, '在线链接'));
-        };
-
-        const loadNoteFromURL = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('note')) {
-                const encodedText = urlParams.get('note');
-                try {
-                    const decodedText = decodeURIComponent(escape(atob(encodedText)));
-                    const [title = '', content = ''] = decodedText.split(CONFIG.NOTE_SEPARATOR);
-                    
-                    DOMElements.noteTitle.innerText = title;
-                    DOMElements.noteContent.innerText = content;
-
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    StorageManager.save();
-                } catch (e) {
-                    console.error("解析URL参数失败:", e);
-                    showToast("加载笔记失败，链接可能已损坏。", { isError: true });
-                    StorageManager.load();
-                }
-            } else {
-                StorageManager.load();
+            if (!DOMElements.modalOverlay.classList.contains('visible')) return;
+            DOMElements.modalOverlay.classList.remove('visible');
+            if (AppState.lastFocused && typeof AppState.lastFocused.focus === 'function') {
+                AppState.lastFocused.focus();
             }
         };
 
+        const onModalKeydown = (e) => {
+            if (!DOMElements.modalOverlay.classList.contains('visible')) return;
+            if (e.key === 'Escape') {
+                closeShareModal();
+                return;
+            }
+            if (e.key !== 'Tab') return;
+            // 简易焦点陷阱：Tab / Shift+Tab 在弹窗内循环
+            const list = getModalFocusables();
+            const first = list[0];
+            const last = list[list.length - 1];
+            const active = document.activeElement;
+            if (e.shiftKey && (active === first || !list.includes(active))) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && (active === last || !list.includes(active))) {
+                e.preventDefault();
+                first.focus();
+            }
+        };
+
+        // --- 10. 编辑：纯文本粘贴 / 拖放 ---
+        const insertPlainText = (text) => {
+            // insertText 会保留编辑器的撤销（undo）历史
+            if (document.execCommand && document.execCommand('insertText', false, text)) return;
+            // 回退：手动插入文本节点
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) return;
+            const range = sel.getRangeAt(0);
+            range.deleteContents();
+            const node = document.createTextNode(text);
+            range.insertNode(node);
+            range.setStartAfter(node);
+            range.collapse(true);
+        };
+
+        const setupPlainTextPaste = () => {
+            const onPaste = (e) => {
+                const clipboardData = e.clipboardData || window.clipboardData;
+                if (!clipboardData) return;
+                const text = clipboardData.getData('text/plain');
+                // 本应用是纯文本记事本：始终拦截粘贴，只接受纯文本，
+                // 防止从网页/Word 粘贴进富文本（格式、图片、外链样式）
+                e.preventDefault();
+                if (typeof text === 'string' && text !== '') insertPlainText(text);
+            };
+            const onDrop = (e) => {
+                const dataTransfer = e.dataTransfer;
+                if (!dataTransfer) return;
+                const text = dataTransfer.getData('text/plain');
+                e.preventDefault();
+                if (typeof text === 'string' && text !== '') insertPlainText(text);
+            };
+            [DOMElements.noteTitle, DOMElements.noteContent].forEach((el) => {
+                el.addEventListener('paste', onPaste);
+                el.addEventListener('drop', onDrop);
+            });
+        };
+
+        const onInput = (e, el) => {
+            // 清空后浏览器常残留 <br>/<div>，会让 :empty 占位符失效；这里归一化（跳过中文输入法组合状态）
+            if (!e.isComposing && el.innerHTML !== '' && el.textContent.trim() === '') {
+                el.innerHTML = '';
+            }
+            debouncedSave();
+        };
+
+        const onTitleKeydown = (e) => {
+            // 标题是单行：回车直接跳到正文
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                DOMElements.noteContent.focus();
+            }
+        };
+
+        // --- 11. 从 URL 加载共享笔记 ---
+        const loadNoteFromURL = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('note')) {
+                StorageManager.load();
+                return;
+            }
+            let decodedText;
+            try {
+                decodedText = base64DecodeUtf8(urlParams.get('note'));
+            } catch (e) {
+                console.error('解析URL参数失败:', e);
+                showToast('加载笔记失败，链接可能已损坏。', { isError: true });
+                StorageManager.load();
+                return;
+            }
+            // 只按第一个分隔符切分，正文中若包含分隔符字符串也可正确还原
+            const sepIndex = decodedText.indexOf(CONFIG.NOTE_SEPARATOR);
+            const title = sepIndex === -1 ? decodedText : decodedText.slice(0, sepIndex);
+            const content = sepIndex === -1 ? '' : decodedText.slice(sepIndex + CONFIG.NOTE_SEPARATOR.length);
+
+            DOMElements.noteTitle.innerText = title;
+            DOMElements.noteContent.innerText = content;
+
+            // 清理地址栏（file:// 等环境下 history API 可能不可用，需保护）
+            try {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) { /* 忽略 */ }
+            StorageManager.save();
+        };
+
+        // --- 12. 初始化 ---
         const init = () => {
-            document.removeEventListener('DOMContentLoaded', init);
             ThemeManager.init();
             loadNoteFromURL();
-            initEventListeners();
-            lucide.createIcons();
+
+            DOMElements.noteTitle.addEventListener('input', (e) => onInput(e, DOMElements.noteTitle));
+            DOMElements.noteContent.addEventListener('input', (e) => onInput(e, DOMElements.noteContent));
+            DOMElements.noteTitle.addEventListener('keydown', onTitleKeydown);
+            setupPlainTextPaste();
+
+            DOMElements.themeToggleBtn.addEventListener('click', () => ThemeManager.toggle());
+            DOMElements.shareBtn.addEventListener('click', openShareModal);
+            DOMElements.modalClose.addEventListener('click', closeShareModal);
+            DOMElements.modalOverlay.addEventListener('click', (e) => {
+                if (e.target === DOMElements.modalOverlay) closeShareModal();
+            });
+            document.addEventListener('keydown', onModalKeydown);
+
+            DOMElements.copyDataUrlBtn.addEventListener('click', () =>
+                copyToClipboard(DOMElements.dataUrlInput.value, '离线快照地址'));
+            DOMElements.copyRedirectUrlBtn.addEventListener('click', () =>
+                copyToClipboard(DOMElements.redirectUrlInput.value, '在线链接'));
+
+            // 页面隐藏/关闭前立即保存，避免丢失防抖窗口内的最后输入
+            window.addEventListener('pagehide', StorageManager.save);
         };
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
+            document.addEventListener('DOMContentLoaded', init, { once: true });
         } else {
             init();
         }
