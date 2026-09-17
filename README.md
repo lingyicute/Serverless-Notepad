@@ -30,10 +30,11 @@ Drop the file on any static host (GitHub Pages, Vercel, Netlify, an S3 bucket, o
 | 💾 | **Auto-save** | Title and body are debounced (500 ms) and persisted to `localStorage`. Close the tab, come back later, everything is still there. |
 | 🌗 | **Dark / Light theme** | Follows your system preference on first visit; a one-click toggle remembers your choice. |
 | 🔗 | **Online share link** | Generates a normal URL (`?note=<base64>`) that anyone can click to open your note in the editor. |
-| 📦 | **Offline snapshot** | Generates a self-contained `data:text/html` URL – a read-only, themed copy of your note that opens without any server at all. |
+| 📦 | **Offline snapshot** | Generates a self-contained `data:text/html` URL – a read-only, themed copy of your note that opens without any server at all. Zero external resources, so it works fully offline. |
 | 📋 | **One-click copy** | Clipboard API with a `execCommand` fallback for non-secure contexts. |
 | 📱 | **Responsive** | Works on phones, tablets and desktops. |
-| 🪶 | **Tiny** | ~20 KB of HTML, CSS and vanilla JavaScript. No build step, no framework. |
+| 📴 | **Fully offline** | No CDNs, no external requests. Double-click `index.html` (`file://`) and everything works – edit, save, share. |
+| 🪶 | **Tiny** | One ~35 KB file of HTML, CSS and vanilla JavaScript. No build step, no framework, no dependencies. |
 
 ## 🚀 Quick Start
 
@@ -50,7 +51,7 @@ cd Serverless-Notepad
 python3 -m http.server 8080
 ```
 > [!tip]
-> Tailwind CSS and Lucide icons are loaded from public CDNs, so an internet connection is required for styling and icons.
+> The app is fully self-contained – no CDNs, no external requests. Just double-click `index.html` and it works offline. (The `introduce/` marketing page still loads Tailwind/Lucide from CDNs.)
 
 ### Deploy your own copy
 
@@ -89,22 +90,22 @@ The share links are generated from `window.location.origin + pathname`, so they 
           └─▶ inline HTML snapshot ──▶ data:text/html;charset=utf-8,… (offline snapshot)
 ```
 
-* **Encoding**: the note is joined with a separator, UTF-8 encoded, then base64-encoded (`btoa(unescape(encodeURIComponent(...)))`).
-* **Snapshot**: a tiny read-only HTML page is generated on the fly, with the note injected via `JSON.stringify` to prevent script injection, plus its own theme toggle and a link back to the editor.
-* **Size guard**: links longer than ~1.8 M characters are rejected with a friendly toast.
+* **Encoding**: the note is joined with a separator, UTF-8 encoded, then base64-encoded (via `TextEncoder` + `btoa`), and URL-encoded (`encodeURIComponent`) inside the link – so `+`/`/` characters in the base64 can never corrupt the link.
+* **Snapshot**: a tiny read-only HTML page is generated on the fly, with the note injected as an escaped JSON payload (no script injection), its own theme toggle, and a link back to the editor. The snapshot is 100 % self-contained (inline CSS + inline SVG) and opens with zero network access.
+* **Size guard**: if the Data-URL snapshot exceeds ~1.8 M characters it is disabled with an explanation, and the (much shorter) online link remains available; if both exceed the limit, a friendly toast is shown.
 
 ## 🛠️ Tech Stack
 
 * Vanilla **HTML / CSS / JavaScript** (ES2015+), IIFE-scoped, no globals
-* [Tailwind CSS](https://tailwindcss.com/) via CDN, with CSS variables for theming
-* [Lucide](https://lucide.dev/) icons via CDN
+* Hand-written CSS with CSS variables for theming (no framework, no CDN)
+* Inline [Lucide-style](https://lucide.dev/) SVG icons (only the 5 used, no external icon library)
 * GitHub Actions → GitHub Pages for deployment
 
 ## ⚠️ Limitations & Privacy
 
 * Notes are stored **only in your browser's `localStorage`** – clearing site data will delete them. Nothing is ever sent to a server.
 * Share links contain the **entire note in plain (base64) text**. Anyone with the link can read it. Do not share sensitive information this way.
-* Very large notes may exceed browser URL length limits, especially for the Data-URL snapshot.
+* Very large notes may exceed browser URL length limits; if the Data-URL snapshot is too long the app falls back to the online link automatically.
 * Only one note is kept at a time; opening a shared link replaces the current note.
 
 ## 🤗 Contributing
